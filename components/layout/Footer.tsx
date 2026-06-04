@@ -8,7 +8,7 @@ export function Footer() {
       <div className="flex items-center gap-[18px]">
         <a href="https://github.com/Kazzz-ab" target="_blank" rel="noopener noreferrer"
           className="hover:text-muted transition-colors duration-150">github</a>
-        <a href="https://linkedin.com/in/kazzz" target="_blank" rel="noopener noreferrer"
+        <a href="https://www.linkedin.com/in/kazi-abrarul-haque05/" target="_blank" rel="noopener noreferrer"
           className="hover:text-muted transition-colors duration-150">linkedin</a>
         <a href="mailto:kaziabrarulh@gmail.com"
           className="hover:text-muted transition-colors duration-150">email</a>
