@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { href: "/ai-ml", label: "ai/ml" },
@@ -24,6 +24,9 @@ function accentForPath(path: string): string {
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  // Close mobile drawer whenever the route changes (e.g. browser back)
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   return (
     <>

@@ -25,6 +25,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: cs.title,
     description: cs.summary,
+    openGraph: {
+      title: cs.title,
+      description: cs.summary,
+      type: "article",
+      url: `https://kazzz.dev/work/${slug}`,
+      ...(cs.hero_image ? { images: [{ url: cs.hero_image }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: cs.title,
+      description: cs.summary,
+    },
   };
 }
 
@@ -56,11 +68,14 @@ export default async function CaseStudyPage({ params }: Props) {
     trackProjects[currentIndex + 1] ??
     allProjects.filter((p) => p.track !== cs.track)[0];
 
-  const artifacts: { label: string; href: string }[] = [
-    cs.repo_url && { label: "github", href: cs.repo_url },
-    cs.demo_url && { label: "live", href: cs.demo_url },
-    cs.loom_url && { label: "loom", href: cs.loom_url },
-  ].filter(Boolean) as { label: string; href: string }[];
+  type Artifact = { label: string; href: string };
+  const artifacts: Artifact[] = (
+    [
+      cs.repo_url ? { label: "github", href: cs.repo_url } : null,
+      cs.demo_url ? { label: "live", href: cs.demo_url } : null,
+      cs.loom_url ? { label: "loom", href: cs.loom_url } : null,
+    ] as (Artifact | null)[]
+  ).filter((x): x is Artifact => x !== null);
 
   return (
     <PageContainer>
@@ -124,7 +139,7 @@ export default async function CaseStudyPage({ params }: Props) {
             {artifacts.length > 0 ? (
               artifacts.map(({ label, href }) => (
                 <a
-                  key={label}
+                  key={`${label}-${href}`}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -192,7 +207,7 @@ export default async function CaseStudyPage({ params }: Props) {
               <div className="flex gap-4.5">
                 {artifacts.map(({ label, href }) => (
                   <a
-                    key={label}
+                    key={`${label}-${href}`}
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"

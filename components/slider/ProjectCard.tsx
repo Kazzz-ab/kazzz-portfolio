@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StackChip } from "@/components/ui/StackChip";
 import type { CaseStudy } from "@/.velite";
@@ -37,6 +40,7 @@ function ProjectThumbnail({ project, track }: { project: CaseStudy; track: "ai-m
         <img
           src={project.architecture_diagram}
           alt={`${project.title} architecture`}
+          loading="lazy"
           className="w-full h-full object-contain opacity-30 scale-110"
         />
       ) : (
@@ -75,21 +79,19 @@ function ProjectThumbnail({ project, track }: { project: CaseStudy; track: "ai-m
 export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
   const accent = trackAccent[track];
   const glow = trackGlow[track];
+  const [hovered, setHovered] = useState(false);
 
   return (
     <div
       className="flex-none w-[360px] sm:w-[400px] p-5 rounded-sm flex flex-col transition-all duration-300"
       style={{
         background: "var(--color-card, #13131A)",
-        border: "0.5px solid var(--border-card)",
+        border: `0.5px solid ${hovered ? glow + "44" : "var(--border-card)"}`,
+        boxShadow: hovered ? `0 4px 32px ${glow}12` : "none",
       }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = glow + "44";
-        (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 32px ${glow}12`;
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--border-card)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => {
+        setHovered(false);
       }}
     >
       {/* Top row */}

@@ -37,12 +37,22 @@ export function MDXContent({ code, track = "ai-ml" }: MDXContentProps) {
     ),
   };
 
-  // Compile the velite-generated MDX code string into a React component
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  const fn = new Function("runtime", code);
-  const { default: Component } = fn(runtime) as {
-    default: React.ComponentType<{ components: typeof components }>;
-  };
-
-  return <Component components={components} />;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const fn = new Function("runtime", code);
+    const { default: Component } = fn(runtime) as {
+      default: React.ComponentType<{ components: typeof components }>;
+    };
+    return <Component components={components} />;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return (
+      <div
+        className="p-4 rounded-sm font-mono text-[12px] text-inflight"
+        style={{ border: "0.5px solid var(--border-subtle)" }}
+      >
+        Case study content could not be rendered: {message}
+      </div>
+    );
+  }
 }

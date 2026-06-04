@@ -123,11 +123,11 @@ export default function AboutPage() {
             },
             {
               title: "Architecture first, then code",
-              body: "The most expensive bugs are built into the data model. I start every system by drawing the boundaries: what&apos;s a service, what&apos;s a record, what&apos;s a side-effect. The first commit is usually the schema.",
+              body: "The most expensive bugs are built into the data model. I start every system by drawing the boundaries: what's a service, what's a record, what's a side-effect. The first commit is usually the schema.",
             },
             {
               title: "Honest about the gaps",
-              body: "Every project here has a \"doesn&apos;t yet\" list. Knowing what&apos;s missing and why is more useful than pretending everything is finished.",
+              body: "Every project here has a \"doesn't yet\" list. Knowing what's missing and why is more useful than pretending everything is finished.",
             },
           ].map(({ title, body }) => (
             <div
@@ -136,7 +136,7 @@ export default function AboutPage() {
               style={{ borderBottom: "0.5px solid var(--border-subtle)" }}
             >
               <h3 className="text-[15px] font-medium text-primary mb-1.5">{title}</h3>
-              <p className="text-[14px] text-body leading-[1.65]" dangerouslySetInnerHTML={{ __html: body }} />
+              <p className="text-[14px] text-body leading-[1.65]">{body}</p>
             </div>
           ))}
         </section>

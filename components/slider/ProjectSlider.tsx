@@ -108,6 +108,7 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
           <button
             onClick={() => scrollTo(Math.max(activeIndex - 1, 0))}
             disabled={activeIndex === 0}
+            aria-label="Previous project"
             className="font-mono text-[13px] w-8 h-8 flex items-center justify-center rounded-sm transition-all duration-150 disabled:opacity-25"
             style={{ border: "0.5px solid var(--border-subtle)" }}
           >
@@ -116,6 +117,7 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
           <button
             onClick={() => scrollTo(Math.min(activeIndex + 1, projects.length - 1))}
             disabled={activeIndex === projects.length - 1}
+            aria-label="Next project"
             className="font-mono text-[13px] w-8 h-8 flex items-center justify-center rounded-sm transition-all duration-150 disabled:opacity-25"
             style={{ border: `0.5px solid ${color}55`, color }}
           >

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Nav } from "@/components/layout/Nav";
@@ -74,21 +74,21 @@ function TrackCard({
   title: string; description: string; ctaCount: string; ctaText: string;
   href: string; motif: React.ReactNode;
 }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <Link href={href} className="group block" data-reveal>
+    <Link
+      href={href}
+      className="group block"
+      data-reveal
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <div
         className="flex items-start gap-6 p-6 rounded-sm transition-all duration-300 cursor-pointer"
         style={{
-          border: "0.5px solid var(--border-subtle)",
+          border: `0.5px solid ${hovered ? glowColor + "40" : "var(--border-subtle)"}`,
           background: "var(--surface-inset)",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = glowColor + "40";
-          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 24px ${glowColor}15`;
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--border-subtle)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "none";
+          boxShadow: hovered ? `0 0 24px ${glowColor}15` : "none",
         }}
       >
         <div className="flex-1 min-w-0">
@@ -108,7 +108,7 @@ function TrackCard({
             </span>
           </div>
         </div>
-        <div className="w-[110px] h-[90px] shrink-0 opacity-50 group-hover:opacity-90 transition-opacity duration-300">
+        <div aria-hidden="true" className="w-[110px] h-[90px] shrink-0 opacity-50 group-hover:opacity-90 transition-opacity duration-300">
           {motif}
         </div>
       </div>

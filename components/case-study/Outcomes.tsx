@@ -59,7 +59,7 @@ export function Outcomes({ children }: OutcomesProps) {
       <p className="text-[14px] text-body mb-5 max-w-[500px] leading-[1.6]">
         Live and queryable. The honest gaps are where the product would invest next, not what I&apos;m hiding.
       </p>
-      <div className="grid grid-cols-2 gap-4">{children}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
     </section>
   );
 }
