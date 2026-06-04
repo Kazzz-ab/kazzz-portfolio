@@ -11,6 +11,15 @@ export function HeroCanvas() {
     const mount = mountRef.current;
     if (!mount) return;
 
+    // Skip canvas on mobile — CSS gradient fallback handles it
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (isMobile) return;
+
+    const isTablet = window.matchMedia("(max-width: 1023px)").matches;
+    const PARTICLE_COUNT = isTablet ? 60 : 120;
+    const CONNECT_DIST = isTablet ? 9 : 11;
+    const MAX_LINES = isTablet ? 80 : 180;
+
     let w = mount.clientWidth;
     let h = mount.clientHeight;
 
@@ -18,28 +27,21 @@ export function HeroCanvas() {
     const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
     camera.position.z = 28;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isTablet });
     renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Cap pixel ratio at 1.5 — above that is wasted GPU work
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
-    // Particles
-    const PARTICLE_COUNT = 130;
-    const particles: {
-      mesh: THREE.Mesh;
-      vx: number;
-      vy: number;
-    }[] = [];
-
-    const geo = new THREE.SphereGeometry(0.06, 6, 6);
+    const geo = new THREE.SphereGeometry(0.06, 5, 5);
+    const particles: { mesh: THREE.Mesh; vx: number; vy: number }[] = [];
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const isAccent = Math.random() > 0.65;
       const mat = new THREE.MeshBasicMaterial({
-        color: isAccent ? 0x6b8eae : 0x3a3a3a,
+        color: Math.random() > 0.6 ? 0x6b8eae : 0x3a3a3a,
         transparent: true,
-        opacity: Math.random() * 0.6 + 0.25,
+        opacity: Math.random() * 0.55 + 0.25,
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(
@@ -47,17 +49,15 @@ export function HeroCanvas() {
         (Math.random() - 0.5) * 35,
         (Math.random() - 0.5) * 8
       );
-      mesh.scale.setScalar(Math.random() * 1.4 + 0.6);
+      mesh.scale.setScalar(Math.random() * 1.3 + 0.6);
       scene.add(mesh);
       particles.push({
         mesh,
-        vx: (Math.random() - 0.5) * 0.025,
-        vy: (Math.random() - 0.5) * 0.015,
+        vx: (Math.random() - 0.5) * 0.022,
+        vy: (Math.random() - 0.5) * 0.014,
       });
     }
 
-    // Line pool
-    const MAX_LINES = 180;
     const lineMat = new THREE.LineBasicMaterial({
       color: 0x6b8eae,
       transparent: true,
@@ -72,8 +72,6 @@ export function HeroCanvas() {
       scene.add(l);
       linePool.push(l);
     }
-
-    const CONNECT_DIST = 11;
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = mount.getBoundingClientRect();
@@ -91,15 +89,14 @@ export function HeroCanvas() {
       renderer.setSize(w, h);
     };
 
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("resize", onResize);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
 
     let frameId: number;
     let li = 0;
 
     const animate = () => {
       frameId = requestAnimationFrame(animate);
-
       linePool.forEach((l) => (l.visible = false));
       li = 0;
 
@@ -108,14 +105,12 @@ export function HeroCanvas() {
         p.mesh.position.y += p.vy;
         if (Math.abs(p.mesh.position.x) > 27.5) p.vx *= -1;
         if (Math.abs(p.mesh.position.y) > 17.5) p.vy *= -1;
-
-        // Mouse repulsion
         const dx = p.mesh.position.x - mouseRef.current.x;
         const dy = p.mesh.position.y - mouseRef.current.y;
         const d = Math.sqrt(dx * dx + dy * dy);
         if (d < 7 && d > 0) {
-          p.mesh.position.x += (dx / d) * 0.12;
-          p.mesh.position.y += (dy / d) * 0.12;
+          p.mesh.position.x += (dx / d) * 0.1;
+          p.mesh.position.y += (dy / d) * 0.1;
         }
       });
 
@@ -134,8 +129,7 @@ export function HeroCanvas() {
             pos[4] = particles[j].mesh.position.y;
             pos[5] = particles[j].mesh.position.z;
             line.geometry.attributes.position.needsUpdate = true;
-            (line.material as THREE.LineBasicMaterial).opacity =
-              (1 - d / CONNECT_DIST) * 0.28;
+            (line.material as THREE.LineBasicMaterial).opacity = (1 - d / CONNECT_DIST) * 0.26;
             line.visible = true;
           }
         }

@@ -159,7 +159,7 @@ export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
             </a>
           )}
           {!project.demo_url && !project.loom_url && (
-            <a href="mailto:abrarulh2004@gmail.com?subject=Demo request"
+            <a href="mailto:kaziabrarulh@gmail.com?subject=Demo request"
               className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
               ask for demo
             </a>

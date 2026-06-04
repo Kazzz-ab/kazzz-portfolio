@@ -10,7 +10,7 @@ export function Footer() {
           className="hover:text-muted transition-colors duration-150">github</a>
         <a href="https://linkedin.com/in/kazzz" target="_blank" rel="noopener noreferrer"
           className="hover:text-muted transition-colors duration-150">linkedin</a>
-        <a href="mailto:abrarulh2004@gmail.com"
+        <a href="mailto:kaziabrarulh@gmail.com"
           className="hover:text-muted transition-colors duration-150">email</a>
       </div>
     </footer>

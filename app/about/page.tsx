@@ -175,11 +175,11 @@ export default function AboutPage() {
             is, what you need. I respond to every serious inquiry within 24 hours.
           </p>
           <a
-            href="mailto:abrarulh2004@gmail.com"
+            href="mailto:kaziabrarulh@gmail.com"
             className="inline-flex items-center gap-2 font-mono text-[12px] text-accent-about px-4 py-2.5 rounded-sm transition-all duration-200 hover:bg-accent-about/10"
             style={{ border: "0.5px solid #8FA88F55" }}
           >
-            abrarulh2004@gmail.com →
+            kaziabrarulh@gmail.com →
           </a>
         </section>
 

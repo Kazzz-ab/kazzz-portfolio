@@ -152,12 +152,21 @@ export default function Home() {
         className="relative overflow-hidden"
         style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       >
+        {/* CSS gradient fallback — visible on mobile where canvas is skipped */}
+        <div
+          className="absolute inset-0 pointer-events-none md:hidden"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 20% 40%, #6B8EAE0A 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 70%, #B899680A 0%, transparent 60%)",
+            zIndex: 0,
+          }}
+        />
         <HeroCanvas />
 
-        <div className="relative z-10 max-w-[720px] mx-auto w-full px-7 pt-7 flex-1 flex flex-col">
+        <div className="relative z-10 max-w-[720px] mx-auto w-full px-5 md:px-7 pt-7 flex-1 flex flex-col">
           <Nav />
 
-          <div className="flex-1 flex flex-col justify-center py-16 md:py-24">
+          <div className="flex-1 flex flex-col justify-center py-10 md:py-24">
             <p
               ref={eyebrowRef}
               className="font-mono text-[11px] tracking-[0.08em] text-faint mb-5"
@@ -215,36 +224,36 @@ export default function Home() {
 
       {/* Track sections */}
       <div
-        className="max-w-[720px] mx-auto px-7 py-14"
+        className="max-w-[720px] mx-auto px-5 md:px-7 py-10 md:py-14"
         style={{ borderTop: "0.5px solid var(--border-subtle)" }}
       >
         <p className="font-mono text-[10px] tracking-[0.12em] text-faint mb-6">select a track</p>
         <div ref={cardsRef} className="flex flex-col gap-3">
           <TrackCard
-            number="01" accentLabel="ai / ml" accentClass="text-accent-ai" glowColor="#6B8EAE"
+            number="01" accentLabel="about" accentClass="text-accent-about" glowColor="#8FA88F"
+            title="Kazi Abrarul Haque — Dhaka"
+            description="Final-year CSE student building production systems. Available for AI integration and architecture-led builds, remote-first."
+            ctaCount="available 2026" ctaText="read more" href="/about"
+            motif={<AboutMotif />}
+          />
+          <TrackCard
+            number="02" accentLabel="ai / ml" accentClass="text-accent-ai" glowColor="#6B8EAE"
             title="AI integration & RAG systems"
             description="Production AI features — retrieval, embeddings, streaming agents, vector search. Built for teams that want AI as a real capability, not a chatbot bolt-on."
             ctaCount="2 projects" ctaText="view work" href="/ai-ml"
             motif={<AiMotif />}
           />
           <TrackCard
-            number="02" accentLabel="business" accentClass="text-accent-biz" glowColor="#B89968"
+            number="03" accentLabel="business" accentClass="text-accent-biz" glowColor="#B89968"
             title="Full-stack business systems"
             description="Booking platforms, multi-tenant apps, headless commerce, marketing systems. Architecture-first builds for operators, not portfolios."
             ctaCount="4 projects" ctaText="view work" href="/business"
             motif={<BizMotif />}
           />
-          <TrackCard
-            number="03" accentLabel="about" accentClass="text-accent-about" glowColor="#8FA88F"
-            title="Kazi Abrarul Haque — Dhaka"
-            description="Final-year CSE student building production systems. Available for AI integration and architecture-led builds, remote-first."
-            ctaCount="available 2026" ctaText="read more" href="/about"
-            motif={<AboutMotif />}
-          />
         </div>
       </div>
 
-      <div className="max-w-[720px] mx-auto px-7">
+      <div className="max-w-[720px] mx-auto px-5 md:px-7">
         <Footer />
       </div>
     </div>

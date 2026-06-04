@@ -8,7 +8,7 @@ const navItems = [
   { href: "/ai-ml", label: "ai/ml" },
   { href: "/business", label: "business" },
   { href: "/about", label: "about" },
-  { href: "mailto:abrarulh2004@gmail.com", label: "contact" },
+  { href: "mailto:kaziabrarulh@gmail.com", label: "contact" },
 ];
 
 function accentForPath(path: string): string {
