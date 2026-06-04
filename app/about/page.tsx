@@ -12,39 +12,50 @@ export const metadata: Metadata = {
 
 const stack = [
   {
-    category: "Backend",
+    category: "Languages",
     items: [
-      { name: "Express.js", note: "production apps, REST APIs, middleware pipelines" },
-      { name: "Prisma ORM", note: "schema-first, typed queries, PostgreSQL" },
-      { name: "PostgreSQL", note: "relational modelling, migrations, indexes" },
-      { name: "Node.js", note: "event loop, streaming, server-side JS runtime" },
+      { name: "TypeScript", note: "strict mode, generics, Zod schemas, utility types" },
+      { name: "JavaScript (ES2024)", note: "async/await, modules, runtime behaviour" },
+      { name: "SQL", note: "joins, indexes, migrations, query optimisation" },
+      { name: "HTML / CSS", note: "semantic markup, accessibility, Tailwind v4" },
     ],
   },
   {
-    category: "Frontend",
+    category: "Backend & Data",
+    items: [
+      { name: "Express.js", note: "REST APIs, middleware chains, rate limiting" },
+      { name: "Prisma ORM", note: "schema-first, typed queries, PostgreSQL migrations" },
+      { name: "PostgreSQL", note: "relational modelling, foreign keys, indexes" },
+      { name: "MongoDB Atlas", note: "document store, Atlas Vector Search, aggregation" },
+      { name: "Node.js", note: "event loop, streaming, child processes" },
+    ],
+  },
+  {
+    category: "Frontend & UI",
     items: [
       { name: "React 19", note: "RSC, hooks, context, component architecture" },
-      { name: "Next.js 16", note: "App Router, SSG, SSR, server actions" },
-      { name: "Tailwind CSS", note: "utility-first, design systems, v4 tokens" },
-      { name: "Framer Motion", note: "page transitions, micro-interactions" },
+      { name: "Next.js 16", note: "App Router, SSG, SSR, server actions, Turbopack" },
+      { name: "Tailwind CSS", note: "utility-first, design systems, v4 CSS tokens" },
+      { name: "Three.js", note: "WebGL, particle systems, 3D canvas scenes" },
+      { name: "GSAP", note: "scroll-triggered animations, timelines" },
     ],
   },
   {
     category: "AI / ML",
     items: [
       { name: "Claude API", note: "structured output, tool use, cite-or-refuse contracts" },
-      { name: "Gemini API", note: "structured generation, form intelligence" },
+      { name: "Gemini API", note: "structured generation, routing summaries" },
       { name: "Voyage Finance-2", note: "domain-tuned financial embeddings" },
-      { name: "MongoDB Atlas Vector", note: "cosine similarity search, hybrid retrieval" },
+      { name: "RAG pipelines", note: "chunking strategy, retrieval, reranking, eval" },
     ],
   },
   {
     category: "Systems & Tools",
     items: [
-      { name: "Vercel", note: "deployment, edge functions, speed insights" },
-      { name: "Webflow", note: "CMS-driven sites, template architecture" },
-      { name: "Three.js", note: "WebGL, particle systems, 3D scenes" },
-      { name: "JWT / RBAC", note: "auth flows, role-based middleware" },
+      { name: "Vercel", note: "deployment, edge functions, speed insights, ISR" },
+      { name: "Webflow", note: "CMS-driven sites, symbols, template architecture" },
+      { name: "JWT / RBAC", note: "auth flows, role-based middleware, refresh tokens" },
+      { name: "Git / GitHub", note: "branching, CI/CD, pull request workflows" },
     ],
   },
 ];
@@ -88,7 +99,7 @@ export default function AboutPage() {
           <div className="flex items-baseline gap-3 mb-6">
             <span className="font-mono text-[11px] tracking-[0.1em] text-accent-about">expertise</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {stack.map(({ category, items }) => (
               <div
                 key={category}
