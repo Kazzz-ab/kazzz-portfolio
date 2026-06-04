@@ -10,57 +10,109 @@ interface ProjectCardProps {
 }
 
 const trackAccent: Record<"ai-ml" | "business", string> = {
-  "ai-ml": "text-accent-ai",
+  "ai-ml":  "text-accent-ai",
   business: "text-accent-biz",
 };
 
-export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
-  const accent = trackAccent[track];
+const trackGlow: Record<"ai-ml" | "business", string> = {
+  "ai-ml":  "#6B8EAE",
+  business: "#B89968",
+};
+
+/* Stylised thumbnail — uses the architecture SVG if available, else gradient */
+function ProjectThumbnail({ project, track }: { project: CaseStudy; track: "ai-ml" | "business" }) {
+  const color = track === "ai-ml" ? "#6B8EAE" : "#B89968";
+  const bg = track === "ai-ml"
+    ? "linear-gradient(135deg, #0d1a24 0%, #0A0A0B 60%)"
+    : "linear-gradient(135deg, #1c1508 0%, #0A0A0B 60%)";
 
   return (
     <div
-      className="flex-none w-[400px] p-5 rounded-sm flex flex-col gap-0"
+      className="w-full h-[130px] rounded-sm relative overflow-hidden flex items-center justify-center mb-3"
+      style={{ background: bg, border: `0.5px solid ${color}22` }}
+    >
+      {project.architecture_diagram ? (
+        /* If we have an SVG diagram, show it faintly */
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={project.architecture_diagram}
+          alt={`${project.title} architecture`}
+          className="w-full h-full object-contain opacity-30 scale-110"
+        />
+      ) : (
+        /* Abstract grid pattern */
+        <svg viewBox="0 0 200 100" className="absolute inset-0 w-full h-full opacity-10">
+          {Array.from({ length: 6 }).map((_, r) =>
+            Array.from({ length: 10 }).map((_, c) => (
+              <rect key={`${r}-${c}`} x={c * 22} y={r * 18} width="16" height="12" rx="1"
+                fill="none" stroke={color} strokeWidth="0.5" />
+            ))
+          )}
+        </svg>
+      )}
+      {/* Domain label overlay */}
+      <div className="absolute inset-0 flex items-end p-3">
+        <span
+          className="font-mono text-[9px] tracking-[0.1em] px-2 py-0.5 rounded-sm"
+          style={{ color, background: `${color}18`, border: `0.5px solid ${color}33` }}
+        >
+          {project.domain.toLowerCase()}
+        </span>
+      </div>
+      {/* AI badge */}
+      {project.ai_layer && project.ai_layer.length > 0 && (
+        <div className="absolute top-2.5 right-2.5">
+          <span className="font-mono text-[8px] tracking-[0.08em] px-1.5 py-0.5 rounded-sm text-accent-ai"
+            style={{ background: "#6B8EAE18", border: "0.5px solid #6B8EAE33" }}>
+            AI-integrated
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
+  const accent = trackAccent[track];
+  const glow = trackGlow[track];
+
+  return (
+    <div
+      className="flex-none w-[360px] sm:w-[400px] p-5 rounded-sm flex flex-col transition-all duration-300"
       style={{
         background: "var(--color-card, #13131A)",
         border: "0.5px solid var(--border-card)",
       }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = glow + "44";
+        (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 32px ${glow}12`;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--border-card)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+      }}
     >
       {/* Top row */}
-      <div className="flex justify-between items-start mb-3.5">
+      <div className="flex justify-between items-start mb-3">
         <div className="flex items-baseline gap-2">
           <span className={`font-mono text-[11px] tracking-[0.04em] ${accent}`}>
             {String(trackOrder).padStart(2, "0")}
-          </span>
-          <span className="font-mono text-[10px] tracking-[0.1em] text-faint uppercase">
-            {project.domain}
           </span>
         </div>
         <StatusBadge status={project.status} />
       </div>
 
-      {/* Title + description */}
-      <h3 className="text-[26px] font-medium tracking-[-0.01em] text-primary leading-[1.15] mb-1.5">
+      {/* Title */}
+      <h3 className="text-[24px] font-medium tracking-[-0.01em] text-primary leading-[1.15] mb-1.5">
         {project.title}
       </h3>
-      <p className="text-[13px] text-body leading-[1.5] mb-4">
-        {project.summary}
-      </p>
+      <p className="text-[13px] text-body leading-[1.5] mb-3">{project.summary}</p>
 
-      {/* Mini diagram placeholder */}
-      <div
-        className="w-full h-[140px] rounded mb-3 flex items-center justify-center"
-        style={{
-          background: "rgba(255,255,255,0.015)",
-          border: "0.5px solid var(--border-subtle)",
-        }}
-      >
-        <span className="font-mono text-[10px] text-faint tracking-[0.06em]">
-          architecture diagram
-        </span>
-      </div>
+      {/* Thumbnail */}
+      <ProjectThumbnail project={project} track={track} />
 
       {/* Stack chips */}
-      <div className="flex flex-wrap gap-1.5 mb-3">
+      <div className="flex flex-wrap gap-1.5 mb-2.5">
         {project.primary_stack.slice(0, 4).map((tech) => (
           <StackChip key={tech} label={tech} />
         ))}
@@ -68,25 +120,51 @@ export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
 
       {/* Capability line */}
       {project.tags.length > 0 && (
-        <p className={`font-mono text-[11px] ${accent} mb-3`}>
+        <p className={`font-mono text-[11px] ${accent} mb-3 leading-[1.4]`}>
           {project.tags.slice(0, 3).join(" · ")}
         </p>
       )}
 
-      {/* Bottom row */}
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Links row */}
       <div
-        className="flex justify-between items-center pt-3 mt-auto"
+        className="flex items-center justify-between pt-3 mt-2 flex-wrap gap-2"
         style={{ borderTop: "0.5px solid var(--border-subtle)" }}
       >
-        <span className="font-mono text-[11px] text-faint">
-          case-study/{project.slug}
-        </span>
         <Link
           href={`/work/${project.slug}`}
-          className="font-mono text-[11px] text-default hover:text-primary transition-colors duration-150"
+          className={`font-mono text-[11px] ${accent} hover:underline transition-all duration-150`}
         >
-          read →
+          case study →
         </Link>
+        <div className="flex items-center gap-3">
+          {project.repo_url && (
+            <a href={project.repo_url} target="_blank" rel="noopener noreferrer"
+              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
+              github
+            </a>
+          )}
+          {project.demo_url && (
+            <a href={project.demo_url} target="_blank" rel="noopener noreferrer"
+              className="font-mono text-[10px] text-faint hover:text-default transition-colors duration-150">
+              live demo
+            </a>
+          )}
+          {project.loom_url && (
+            <a href={project.loom_url} target="_blank" rel="noopener noreferrer"
+              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
+              loom
+            </a>
+          )}
+          {!project.demo_url && !project.loom_url && (
+            <a href="mailto:abrarulh2004@gmail.com?subject=Demo request"
+              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
+              ask for demo
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

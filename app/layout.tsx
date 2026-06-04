@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { SmoothScroll } from "@/components/SmoothScroll";
 import "./globals.css";
 
 const inter = Inter({
@@ -18,14 +19,14 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Kazzz",
-    template: "%s · Kazzz",
+    default: "Kazi Abrarul Haque",
+    template: "%s · Kazi Abrarul Haque",
   },
   description:
     "Building full-stack business solutions at the crossroads of software and AI.",
   metadataBase: new URL("https://kazzz.dev"),
   openGraph: {
-    siteName: "Kazzz",
+    siteName: "Kazi Abrarul Haque",
     type: "website",
   },
 };
@@ -37,7 +38,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }

@@ -30,13 +30,8 @@ const principles = [
 ];
 
 export default function BusinessPage() {
+  // Show all business projects sorted by order
   const projects = getCaseStudiesByTrack("business");
-  // Show ClinicFlow + CounselFlow as a paired first entry, then the rest
-  const paired = projects.filter((p) => ["clinicflow", "counselflow"].includes(p.slug));
-  const single = projects.filter((p) => !["clinicflow", "counselflow"].includes(p.slug));
-  const displayProjects = paired.length > 0
-    ? [paired[0], ...single]
-    : projects;
 
   return (
     <PageContainer>
@@ -56,10 +51,10 @@ export default function BusinessPage() {
         </p>
       </div>
 
-      {/* Slider */}
-      {displayProjects.length > 0 ? (
+      {/* Slider — shows ClinicFlow, CounselFlow, HaqueMart, Meridian */}
+      {projects.length > 0 ? (
         <div className="mb-8">
-          <ProjectSlider projects={displayProjects} track="business" />
+          <ProjectSlider projects={projects} track="business" />
         </div>
       ) : (
         <div className="mb-8 h-48 flex items-center justify-center font-mono text-[11px] text-faint"
@@ -76,7 +71,6 @@ export default function BusinessPage() {
             How I think about business systems
           </h2>
         </div>
-
         <div>
           {principles.map((p, i) => (
             <div
@@ -87,9 +81,7 @@ export default function BusinessPage() {
                 borderBottom: i < principles.length - 1 ? "0.5px solid var(--border-subtle)" : undefined,
               }}
             >
-              <span className="font-mono text-[26px] tracking-[-0.02em] text-accent-biz">
-                {p.number}
-              </span>
+              <span className="font-mono text-[26px] tracking-[-0.02em] text-accent-biz">{p.number}</span>
               <div>
                 <h3 className="text-[18px] font-medium text-primary mb-3">{p.title}</h3>
                 <p className="text-[14px] text-body leading-[1.65] max-w-[520px]">{p.body}</p>

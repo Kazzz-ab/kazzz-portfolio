@@ -49,6 +49,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Animations */
+@keyframes fadeDown {
+  0%   { opacity: 0; transform: translateY(-4px); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.4); }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

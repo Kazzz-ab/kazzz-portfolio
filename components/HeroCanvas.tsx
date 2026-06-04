@@ -1,0 +1,164 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
+
+export function HeroCanvas() {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
+
+    let w = mount.clientWidth;
+    let h = mount.clientHeight;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
+    camera.position.z = 28;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    mount.appendChild(renderer.domElement);
+
+    // Particles
+    const PARTICLE_COUNT = 130;
+    const particles: {
+      mesh: THREE.Mesh;
+      vx: number;
+      vy: number;
+    }[] = [];
+
+    const geo = new THREE.SphereGeometry(0.06, 6, 6);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const isAccent = Math.random() > 0.65;
+      const mat = new THREE.MeshBasicMaterial({
+        color: isAccent ? 0x6b8eae : 0x3a3a3a,
+        transparent: true,
+        opacity: Math.random() * 0.6 + 0.25,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(
+        (Math.random() - 0.5) * 55,
+        (Math.random() - 0.5) * 35,
+        (Math.random() - 0.5) * 8
+      );
+      mesh.scale.setScalar(Math.random() * 1.4 + 0.6);
+      scene.add(mesh);
+      particles.push({
+        mesh,
+        vx: (Math.random() - 0.5) * 0.025,
+        vy: (Math.random() - 0.5) * 0.015,
+      });
+    }
+
+    // Line pool
+    const MAX_LINES = 180;
+    const lineMat = new THREE.LineBasicMaterial({
+      color: 0x6b8eae,
+      transparent: true,
+      opacity: 0.18,
+    });
+    const linePool: THREE.Line[] = [];
+    for (let i = 0; i < MAX_LINES; i++) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
+      const l = new THREE.Line(g, lineMat.clone());
+      l.visible = false;
+      scene.add(l);
+      linePool.push(l);
+    }
+
+    const CONNECT_DIST = 11;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = mount.getBoundingClientRect();
+      mouseRef.current = {
+        x: ((e.clientX - rect.left) / w - 0.5) * 55,
+        y: -((e.clientY - rect.top) / h - 0.5) * 35,
+      };
+    };
+
+    const onResize = () => {
+      w = mount.clientWidth;
+      h = mount.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("resize", onResize);
+
+    let frameId: number;
+    let li = 0;
+
+    const animate = () => {
+      frameId = requestAnimationFrame(animate);
+
+      linePool.forEach((l) => (l.visible = false));
+      li = 0;
+
+      particles.forEach((p) => {
+        p.mesh.position.x += p.vx;
+        p.mesh.position.y += p.vy;
+        if (Math.abs(p.mesh.position.x) > 27.5) p.vx *= -1;
+        if (Math.abs(p.mesh.position.y) > 17.5) p.vy *= -1;
+
+        // Mouse repulsion
+        const dx = p.mesh.position.x - mouseRef.current.x;
+        const dy = p.mesh.position.y - mouseRef.current.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 7 && d > 0) {
+          p.mesh.position.x += (dx / d) * 0.12;
+          p.mesh.position.y += (dy / d) * 0.12;
+        }
+      });
+
+      for (let i = 0; i < particles.length && li < MAX_LINES; i++) {
+        for (let j = i + 1; j < particles.length && li < MAX_LINES; j++) {
+          const dx = particles[i].mesh.position.x - particles[j].mesh.position.x;
+          const dy = particles[i].mesh.position.y - particles[j].mesh.position.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < CONNECT_DIST) {
+            const line = linePool[li++];
+            const pos = line.geometry.attributes.position.array as Float32Array;
+            pos[0] = particles[i].mesh.position.x;
+            pos[1] = particles[i].mesh.position.y;
+            pos[2] = particles[i].mesh.position.z;
+            pos[3] = particles[j].mesh.position.x;
+            pos[4] = particles[j].mesh.position.y;
+            pos[5] = particles[j].mesh.position.z;
+            line.geometry.attributes.position.needsUpdate = true;
+            (line.material as THREE.LineBasicMaterial).opacity =
+              (1 - d / CONNECT_DIST) * 0.28;
+            line.visible = true;
+          }
+        }
+      }
+
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("resize", onResize);
+      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
+      renderer.dispose();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={mountRef}
+      className="absolute inset-0"
+      style={{ pointerEvents: "none", zIndex: 0 }}
+    />
+  );
+}
