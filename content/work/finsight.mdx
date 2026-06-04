@@ -1,0 +1,131 @@
+---
+title: FinSight
+slug: finsight
+summary: RAG over global public company filings. Ask grounded questions, get cited answers from 10-Ks and 10-Qs.
+problem_oneliner: An analyst's question is fast, but verifying the answer came from a specific filing is slow.
+order: 1
+featured: true
+status: shipped
+track: ai-ml
+role: Solo full-stack
+timeline: 3 weeks
+domain: Financial intelligence
+client_type: Portfolio
+primary_stack: [Next.js, TypeScript, MongoDB Atlas, Claude API]
+ai_layer: [Voyage Finance-2 embeddings, Atlas Vector Search, Claude claude-sonnet-4-6]
+deployment: Vercel
+repo_url: https://github.com/Kazzz-ab/FinSight
+architecture_diagram: /diagrams/finsight.svg
+tags: [rag, vector-search, embeddings, citations, financial-data]
+related_work: [argus]
+related_writing: []
+embedding_ready: true
+embedding_priority: high
+accent_color: "#6B8EAE"
+---
+
+<Problem>
+For analysts working with financial filings, the gap is rarely access — 10-Ks are public. The gap is *grounding*: an analyst's question is fast, but verifying that the answer came from a specific paragraph in a specific filing is slow. Generic LLMs answer fluently and untraceably. Fluent and untraceable is worse than no answer at all in a compliance context.
+
+FinSight had to do the opposite — every claim anchored to a source passage the user can click and verify, or no answer at all. The design challenge was building a system where "I don't know" is a first-class output, not a fallback. That constraint shapes every layer from chunk metadata to the response schema.
+</Problem>
+
+<Architecture diagram="/diagrams/finsight.svg">
+The pipeline splits cleanly into two paths that share one data store. Ingestion runs once per filing: fetch from EDGAR or Companies House, parse the HTML into sections preserving headings, chunk at ~700 tokens with 80-token overlap, embed with Voyage Finance-2, upsert into Atlas Vector Search with filing and section metadata attached.
+
+Query time: embed the question with the same model, retrieve the top-12 chunks by cosine similarity with a 0.6 floor, apply a lexical boost for exact term matches, assemble numbered source blocks, and send a single structured-output call to Claude. The response schema requires either a cited answer or an explicit refusal — there is no path to an uncited claim.
+</Architecture>
+
+<Decisions subtitle="Four calls that shaped FinSight more than the framework choice did. In order of impact.">
+
+<Decision
+  number="01"
+  title="Atlas Vector Search over Pinecone"
+  chose="MongoDB Atlas Vector Search (native to the existing Atlas cluster)"
+  rejected="Pinecone, Weaviate, pgvector"
+  why="The filing chunks and their metadata — company, filing date, section, page — live in the same Atlas cluster. Vector search as a native index means one query can filter by filing ID and retrieve by similarity in a single round-trip. Pinecone would have meant a second network hop plus duplicating metadata. At this corpus size the performance difference is immaterial; the operational simplicity is not."
+/>
+
+<Decision
+  number="02"
+  title="Voyage Finance-2 over OpenAI text-embedding-3-large"
+  chose="Voyage Finance-2 (domain-tuned on financial language)"
+  rejected="OpenAI text-embedding-3-large, Cohere embed-english-v3"
+  why="Financial filings use precise domain vocabulary — EBITDA, goodwill impairment, segment reporting — where general-purpose embeddings under-discriminate. Voyage Finance-2 is trained on financial corpora. In informal evals on AAPL and MSFT 10-K questions, it retrieved the right section 2–3 positions higher than OpenAI embeddings. The second API key is a small operational cost for a meaningful recall improvement."
+/>
+
+<Decision
+  number="03"
+  title="Structured output schema over prompt-only citations"
+  chose="Zod-validated JSON schema enforced at the API call level: `{ answer, usedChunkIds, refused }`"
+  rejected="Prompt instructions asking Claude to cite sources inline"
+  why="Prompts request; schemas enforce. Under load or with adversarial queries, instructed citation formats drift. By requiring a response that maps every claim to a `chunkId` from the retrieved set — validated before the response reaches the client — the grounding guarantee is architectural, not behavioral. If Claude returns a `chunkId` not in the retrieved set, the response is rejected server-side."
+/>
+
+<Decision
+  number="04"
+  title="Next.js Server Actions over a separate API layer"
+  chose="Next.js 14 Server Actions for both ingestion and query"
+  rejected="Separate NestJS API, Express routes, standalone serverless functions"
+  why="Server Actions keep the API keys — Voyage, Anthropic, MongoDB Atlas — out of the client bundle with no additional infrastructure. For a single-developer project where the frontend and the AI pipeline are co-located, the overhead of a separate API service is pure friction with no benefit. The tradeoff is that the pipeline is harder to reuse across clients — acceptable for a portfolio project, worth revisiting for a production multi-tenant deployment."
+/>
+
+</Decisions>
+
+<Code title="The grounding contract in shape">
+{`// finsight/lib/answer.ts
+import { z } from "zod";
+
+// Every response must either cite or refuse.
+// A non-refused answer with no usedChunkIds is rejected before it reaches the client.
+const AnswerSchema = z.object({
+  answer: z.string(),
+  usedChunkIds: z.array(z.string()),
+  refused: z.boolean(),
+});
+
+export async function generateAnswer(
+  question: string,
+  contextBlocks: ContextBlock[]
+) {
+  const response = await anthropic.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1024,
+    system: SYSTEM_PROMPT, // cite [SOURCE N] or say "not stated in the filing"
+    messages: [{ role: "user", content: buildUserMessage(question, contextBlocks) }],
+  });
+
+  const parsed = AnswerSchema.parse(JSON.parse(extractJson(response)));
+
+  // Validate that every cited chunk was actually retrieved
+  const retrievedIds = new Set(contextBlocks.map((b) => b.chunkId));
+  const allCited = parsed.usedChunkIds.every((id) => retrievedIds.has(id));
+  if (!allCited) throw new Error("Model cited a chunk not in the retrieved set");
+
+  return parsed;
+}`}
+</Code>
+
+<Outcomes>
+<Works>
+- 6 filings indexed at launch (AAPL, MSFT, GOOGL, AMZN, NVDA, JPM — FY2023/FY2024 10-Ks)
+- Citations resolve to the source passage on click
+- Cite-or-refuse works correctly — "not stated in the filing" fires on out-of-scope questions
+- Sub-2s end-to-end latency on typical queries
+- Ingestion is idempotent — re-running on the same filing ID is safe
+</Works>
+<DoesntYet>
+- Temporal reasoning is weak — "how did revenue change year-over-year" requires prompting help
+- No cross-filing aggregation (compare AAPL vs MSFT margins in one query)
+- XBRL structured number extraction is not implemented — amounts come from prose, not data tags
+- No user-uploaded filing support in the deployed version
+</DoesntYet>
+</Outcomes>
+
+<Lessons>
+Build the eval harness before optimizing anything. I spent a day tuning chunk size from 512 to 700 tokens without a measurement framework. I was optimizing a number I couldn't verify was moving in the right direction.
+
+The structured output contract should have been v0, not v2. The first version used prompt-instructed citations that drifted under adversarial questions. Switching to the Zod schema required rewriting the answer service and the UI citation resolver. Both would have been simpler if the schema had been the starting point.
+
+Voyage Finance-2 was the right call for recall quality, but it added a second API key, a second billing account, and a second rate-limit to manage. At higher scale I'd evaluate whether a unified embedding provider — even with slightly lower domain precision — simplifies operations enough to be worth it.
+</Lessons>

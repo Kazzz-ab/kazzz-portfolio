@@ -1,0 +1,104 @@
+<svg viewBox="0 0 640 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="finsight-title finsight-desc">
+  <title id="finsight-title">FinSight Architecture</title>
+  <desc id="finsight-desc">Two-row pipeline: ingestion (top) and query (bottom) sharing Atlas Vector Search</desc>
+
+  <!-- Row labels -->
+  <text x="12" y="72" font-family="monospace" font-size="9" fill="#5A5A55" letter-spacing="0.04em">INGESTION</text>
+  <text x="12" y="192" font-family="monospace" font-size="9" fill="#5A5A55" letter-spacing="0.04em">QUERY</text>
+
+  <!-- ── INGESTION ROW ── -->
+
+  <!-- EDGAR / PDF -->
+  <rect x="60" y="40" width="80" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="100" y="57" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">EDGAR</text>
+  <text x="100" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">/ PDF</text>
+
+  <!-- Arrow -->
+  <line x1="141" y1="60" x2="165" y2="60" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="165,57 170,60 165,63" fill="#3A3A38"/>
+
+  <!-- Parser -->
+  <rect x="171" y="40" width="80" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="211" y="57" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">parse</text>
+  <text x="211" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">sections</text>
+
+  <!-- Arrow -->
+  <line x1="252" y1="60" x2="276" y2="60" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="276,57 281,60 276,63" fill="#3A3A38"/>
+
+  <!-- Chunker -->
+  <rect x="282" y="40" width="80" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="322" y="57" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">chunk</text>
+  <text x="322" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">700 tok</text>
+
+  <!-- Arrow -->
+  <line x1="363" y1="60" x2="387" y2="60" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="387,57 392,60 387,63" fill="#3A3A38"/>
+
+  <!-- Embedder -->
+  <rect x="393" y="40" width="80" height="40" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="433" y="57" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">embed</text>
+  <text x="433" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">Voyage-2</text>
+
+  <!-- Arrow -->
+  <line x1="474" y1="60" x2="498" y2="60" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="498,57 503,60 498,63" fill="#3A3A38"/>
+
+  <!-- Atlas Vector -->
+  <rect x="504" y="28" width="96" height="64" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="552" y="53" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">Atlas</text>
+  <text x="552" y="66" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">Vector</text>
+  <text x="552" y="79" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">Search</text>
+
+  <!-- Divider -->
+  <line x1="60" y1="120" x2="600" y2="120" stroke="#2A2A2A" stroke-width="0.5"/>
+
+  <!-- ── QUERY ROW ── -->
+
+  <!-- User query -->
+  <rect x="60" y="148" width="80" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="100" y="165" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">user</text>
+  <text x="100" y="178" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">question</text>
+
+  <!-- Arrow -->
+  <line x1="141" y1="168" x2="165" y2="168" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="165,165 170,168 165,171" fill="#3A3A38"/>
+
+  <!-- Embed query -->
+  <rect x="171" y="148" width="80" height="40" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="211" y="165" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">embed</text>
+  <text x="211" y="178" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">query</text>
+
+  <!-- Arrow to Atlas (diagonal) -->
+  <line x1="252" y1="168" x2="510" y2="108" stroke="#6B8EAE" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <polygon points="507,105 514,107 510,113" fill="#6B8EAE"/>
+
+  <!-- Arrow from Atlas to retrieve -->
+  <line x1="504" y1="148" x2="480" y2="168" stroke="#6B8EAE" stroke-width="0.5"/>
+  <polygon points="477,165 480,172 484,167" fill="#6B8EAE"/>
+
+  <!-- Retrieve + rerank -->
+  <rect x="364" y="148" width="96" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="412" y="165" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">retrieve</text>
+  <text x="412" y="178" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">+ rerank</text>
+
+  <!-- Arrow -->
+  <line x1="363" y1="168" x2="339" y2="168" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="342,165 336,168 342,171" fill="#3A3A38"/>
+
+  <!-- Claude -->
+  <rect x="258" y="148" width="80" height="40" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="298" y="165" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">Claude</text>
+  <text x="298" y="178" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">generate</text>
+
+  <!-- Arrow -->
+  <line x1="257" y1="168" x2="233" y2="168" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="236,165 230,168 236,171" fill="#3A3A38"/>
+
+  <!-- Cited answer -->
+  <rect x="152" y="220" width="96" height="40" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <line x1="211" y1="189" x2="211" y2="219" stroke="#6B8EAE" stroke-width="0.5"/>
+  <polygon points="208,216 211,222 214,216" fill="#6B8EAE"/>
+  <text x="200" y="238" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">cited</text>
+  <text x="200" y="251" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">answer</text>
+</svg>

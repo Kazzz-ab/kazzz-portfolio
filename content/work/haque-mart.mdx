@@ -1,0 +1,114 @@
+---
+title: Haque Mart
+slug: haque-mart
+summary: Headless WooCommerce storefront for the Bangladeshi SME market, built on Next.js with a pluggable payment adapter.
+problem_oneliner: Most commerce platforms assume Western payment infrastructure — bKash and SSLCommerz aren't afterthoughts.
+order: 3
+featured: false
+status: shipped
+track: business
+role: Solo full-stack
+timeline: 3 weeks
+domain: E-commerce
+client_type: Portfolio
+primary_stack: [Next.js, TypeScript, WooCommerce, WPGraphQL]
+ai_layer: null
+deployment: Vercel
+repo_url: https://github.com/Kazzz-ab/HaqueMart
+tags: [commerce, headless, nextjs, payments]
+related_work: []
+related_writing: []
+embedding_ready: true
+embedding_priority: normal
+accent_color: "#B89968"
+---
+
+<Problem>
+Most headless commerce stacks are designed for Stripe-first markets. For SMEs in Bangladesh, the dominant payment methods are bKash (mobile money) and SSLCommerz — neither of which slots cleanly into a Stripe-shaped payment interface. Building around Stripe and treating bKash as an afterthought means redesigning the checkout flow when the primary payment method lands.
+
+The constraint here was architectural: the payment layer had to be an interface, not a dependency. The storefront couldn't know or care which provider was active. That contract had to be established before the first checkout component was written.
+</Problem>
+
+<Architecture diagram="/diagrams/haque-mart.svg">
+The architecture is two layers with a clean seam between them. WordPress + WooCommerce handles the product catalogue, inventory, and order state — accessed exclusively through WPGraphQL. The Next.js frontend consumes it at build time (static product pages) and at request time (cart, checkout). When the WordPress endpoint is absent, a mock data fallback activates automatically, letting the frontend run and demo without a backend dependency.
+
+The payment layer sits behind a `PaymentProvider` interface. Any provider — Stripe, bKash, SSLCommerz — implements the same three methods: `initiate`, `confirm`, `refund`. The checkout component calls the interface; it never imports a specific provider directly. Swapping providers is a config change, not a refactor.
+</Architecture>
+
+<Decisions subtitle="Three decisions that defined the project's architecture.">
+
+<Decision
+  number="01"
+  title="WPGraphQL over WooCommerce REST API"
+  chose="WPGraphQL for typed, filterable product queries"
+  rejected="WooCommerce REST API, custom REST endpoints"
+  why="WPGraphQL lets you request exactly the fields you need — product images, variants, stock status, reviews — in a single typed query. The REST API returns over-fetched payloads and requires multiple round-trips for nested data (e.g. product + category + reviews). GraphQL Codegen then generates TypeScript types from the schema automatically, so the frontend and backend are always in sync without manual type maintenance."
+/>
+
+<Decision
+  number="02"
+  title="PaymentProvider interface over Stripe-first wiring"
+  chose="Abstract `PaymentProvider` interface with provider implementations behind it"
+  rejected="Stripe SDK imported directly in checkout components"
+  why="The Bangladeshi SME market uses bKash and SSLCommerz as primary payment methods. Wiring Stripe directly into checkout components would mean a refactor when those providers land — not a config swap. The interface adds one abstraction layer; it pays for itself the first time the active provider changes without a UI code change."
+/>
+
+<Decision
+  number="03"
+  title="Mock data fallback as a first-class feature"
+  chose="Explicit `isWpConfigured()` gate that activates curated mock data"
+  rejected="Hardcoded WP endpoint requirement, error boundary with fallback UI"
+  why="The frontend should be deployable and demo-able without a live WooCommerce backend. A mock data layer that activates automatically when the WP URL is absent means the UI can be reviewed, tested, and shown to clients before the backend is wired. The 'Demo mode' banner signals the distinction clearly to anyone viewing the deploy."
+/>
+
+</Decisions>
+
+<Code title="PaymentProvider interface">
+{`// haque-mart/src/lib/payments/types.ts
+export interface PaymentProvider {
+  initiate(order: Order): Promise<PaymentSession>;
+  confirm(sessionId: string): Promise<PaymentResult>;
+  refund(orderId: string, amount: number): Promise<void>;
+}
+
+// haque-mart/src/lib/payments/stripe.ts
+export class StripeProvider implements PaymentProvider {
+  async initiate(order: Order): Promise<PaymentSession> {
+    const intent = await stripe.paymentIntents.create({
+      amount: order.totalInCents,
+      currency: "bdt",
+    });
+    return { id: intent.id, clientSecret: intent.client_secret! };
+  }
+  // confirm, refund ...
+}
+
+// Checkout component never imports StripeProvider directly.
+// It receives a PaymentProvider via dependency injection.
+// Swapping to bKash = swap the injected implementation.`}
+</Code>
+
+<Outcomes>
+<Works>
+- Product catalogue with category filters and text search
+- WPGraphQL integration with TypeScript types auto-generated from schema
+- Mock data fallback with "Demo mode" banner — frontend runs without a live WP backend
+- Cart with localStorage persistence (survives page reload)
+- PaymentProvider interface in place — Stripe test-mode implemented
+- Fully responsive dark UI (amber-on-charcoal design system)
+</Works>
+<DoesntYet>
+- bKash and SSLCommerz provider implementations — interface is wired, providers are not
+- Real payment processing — Stripe is test-mode only
+- User accounts and order history
+- Inventory sync (WooCommerce stock updates don't trigger revalidation)
+</DoesntYet>
+</Outcomes>
+
+<Lessons>
+GraphQL Codegen is a genuine multiplier for a solo developer. The types update automatically when the schema changes — no manual sync between what WooCommerce returns and what TypeScript expects. The setup cost is one config file; the payoff is ongoing.
+
+The mock fallback deserved more investment early. I added it midway through as a convenience for demos, but having it from day one would have made the frontend development loop faster. The UI should have been buildable against mock data from the first commit.
+
+The `PaymentProvider` abstraction was the right call but I over-engineered the interface on the first pass — I included methods for subscriptions and webhooks before any provider needed them. The interface should have been the minimum needed: initiate, confirm, refund. Add to it when a real provider requires it.
+</Lessons>

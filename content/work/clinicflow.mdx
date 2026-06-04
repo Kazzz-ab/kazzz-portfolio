@@ -1,0 +1,109 @@
+---
+title: ClinicFlow
+slug: clinicflow
+summary: Booking and practice management for small clinics — patient records, doctor scheduling, invoicing, and analytics on a single Express + Prisma backend.
+problem_oneliner: Small clinics need booking software that isn't enterprise SaaS pricing for enterprise SaaS features.
+order: 1
+featured: true
+status: shipped
+track: business
+role: Solo full-stack
+timeline: 4 weeks
+domain: Healthcare
+client_type: Portfolio
+primary_stack: [Express, TypeScript, Prisma, PostgreSQL, React, Tailwind]
+ai_layer: null
+deployment: Vercel
+tags: [multi-tenant, booking, crm, architecture]
+related_work: [counselflow]
+related_writing: []
+embedding_ready: true
+embedding_priority: normal
+accent_color: "#B89968"
+---
+
+<Problem>
+Small clinics run on spreadsheets, WhatsApp, and paper appointment books. Commercial practice management software exists but it's priced for hospital systems — monthly SaaS fees that a 3-doctor clinic can't justify for a booking calendar and a patient list. The gap is a system that covers the actual workflow: receptionist books an appointment, doctor sees the patient queue for the day, admin generates an invoice, owner looks at the weekly stats. Nothing more, nothing less.
+
+The secondary constraint was architectural: the same backend design had to serve a law firm product (CounselFlow) with different domain vocabulary and different business rules but identical infrastructure. That pairing shaped every design decision from the data model outward.
+</Problem>
+
+<Architecture diagram="/diagrams/clinicflow-platform.svg">
+The backend is a single Express + Prisma application with PostgreSQL as the data store. Prisma handles the schema, migrations, and typed queries — the data model covers Users (with roles), Patients, Doctors, Appointments, Invoices, and the relations between them. JWT handles auth with role-based middleware protecting routes by role: receptionist, doctor, admin.
+
+The frontend is a React + Vite SPA with React Router and Tailwind CSS. Pages map directly to the clinic workflow: patient intake form, appointment calendar, doctor availability settings, invoice generation, and an analytics dashboard. The CounselFlow frontend follows the exact same structure — Patients become Clients, Doctors become Attorneys, Appointments become Cases — with domain-appropriate copy and a different visual identity.
+</Architecture>
+
+<Decisions subtitle="Three decisions that made the paired-platform architecture work.">
+
+<Decision
+  number="01"
+  title="PostgreSQL over MongoDB"
+  chose="PostgreSQL with Prisma ORM and typed schema"
+  rejected="MongoDB + Mongoose, SQLite"
+  why="Appointments, invoices, and patient records are inherently relational. A patient has many appointments; an appointment references a doctor and a patient; an invoice references an appointment. Document databases flatten these relations into embedded arrays or manual join logic. PostgreSQL handles them natively with foreign keys and joins. Prisma generates TypeScript types from the schema automatically, so the API layer is always type-safe against the database shape."
+/>
+
+<Decision
+  number="02"
+  title="Express over NestJS"
+  chose="Express with manual middleware composition"
+  rejected="NestJS, Fastify, Hono"
+  why="NestJS's decorator-based structure adds significant boilerplate for a project where the route surface is known and bounded. Express lets you see the full middleware chain at a glance — auth, rate limit, audit log, error handler — without IoC container concepts getting in the way. For a project that needs to be forked into CounselFlow with different business logic, explicitness over magic is the right tradeoff."
+/>
+
+<Decision
+  number="03"
+  title="Shared backend pattern, separate frontend codebases"
+  chose="Same Express/Prisma/PostgreSQL architecture for both ClinicFlow and CounselFlow, separate React frontends"
+  rejected="One monorepo with shared components, one codebase with domain flags"
+  why="The business rules diverge enough that a shared codebase with domain flags (if clinic... else law_firm...) would become unreadable fast. Separate frontends mean each product can evolve its UI independently. The shared pattern is architectural — same route structure, same auth model, same Prisma patterns — not a shared runtime. This is the senior signal: knowing when to share code vs. when to share a pattern."
+/>
+
+</Decisions>
+
+<Code title="Role-based route protection">
+{`// backend/src/middleware/auth.js
+export const requireRole = (...roles) => (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  if (!roles.includes(req.user.role)) {
+    return res.status(403).json({ error: "Insufficient permissions" });
+  }
+  next();
+};
+
+// backend/src/routes/admin.js
+router.get("/users", authenticate, requireRole("admin"), async (req, res) => {
+  const users = await prisma.user.findMany({ select: { id, name, email, role } });
+  res.json(users);
+});
+
+// Receptionist books appointments; only admin can see all users.
+// Doctor routes are protected separately — doctors only see their own queue.`}
+</Code>
+
+<Outcomes>
+<Works>
+- Patient intake with full medical history, allergies, insurance fields
+- Appointment booking with doctor availability grid (working hours, available days)
+- Invoice generation linked to appointments with line items
+- Role-based access: receptionist, doctor, admin each see their workflow
+- Analytics dashboard: daily appointment counts, revenue by period, patient stats
+- Audit logging on all mutations (who changed what and when)
+- Email notifications via Resend (appointment reminders, invoice receipts)
+</Works>
+<DoesntYet>
+- Multi-clinic tenancy — currently single-clinic per deployment
+- Calendar sync (Google Calendar, iCal export)
+- Insurance claim submission — invoice data is captured but not filed
+- Mobile app — the React SPA is responsive but not native
+</DoesntYet>
+</Outcomes>
+
+<Lessons>
+Prisma's migration workflow is the best part of the stack. Schema changes are tracked as versioned migration files, and the generated types update automatically. The discipline of "change the schema first, then the code" produces a cleaner API layer than writing the API and inferring the schema from it.
+
+The audit log should have been designed as a first-class data structure from day one. I added it midway as a middleware side-effect that writes to a JSON log. A proper `AuditLog` model in Prisma would make it queryable — "show me all changes to patient ID X in the last 30 days" — rather than requiring log parsing.
+
+The shared-pattern approach between ClinicFlow and CounselFlow worked exactly as intended. Building CounselFlow took roughly 40% of the time ClinicFlow took because the architecture decisions were already made. The frontend vocabulary swap (Patient → Client, Doctor → Attorney) was a find-and-replace plus domain-specific business logic. That's the payoff of solving architecture before solving features.
+</Lessons>

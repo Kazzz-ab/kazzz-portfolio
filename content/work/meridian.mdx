@@ -1,0 +1,113 @@
+---
+title: Meridian
+slug: meridian
+summary: Webflow template for professional service firms with an AI-powered consultation form backed by a Vercel serverless function.
+problem_oneliner: Small professional service firms need a marketing site that converts — not a template with a bolt-on chatbot.
+order: 4
+featured: false
+status: shipped
+track: business
+role: Solo full-stack
+timeline: 1 week
+domain: Marketing systems
+client_type: Portfolio
+primary_stack: [Webflow, TypeScript, Vercel Serverless]
+ai_layer: [Gemini API]
+deployment: Vercel + Webflow
+architecture_diagram: /diagrams/meridian.svg
+tags: [webflow, architecture]
+related_work: []
+related_writing: []
+embedding_ready: true
+embedding_priority: normal
+accent_color: "#B89968"
+---
+
+<Problem>
+Small professional service firms — law practices, consultancies, accounting firms — need a marketing site that converts enquiries into consultations. Most Webflow templates solve the design problem but leave the form as a static email trigger. The gap is the handoff: a visitor submits a contact form, gets a generic "we'll be in touch" message, and the business receives an unstructured email with no routing signal.
+
+Meridian solves one specific problem: the form submission should generate a tailored acknowledgement for the visitor and a structured routing summary for the business, without requiring the firm to build or maintain any backend infrastructure.
+</Problem>
+
+<Architecture diagram="/diagrams/meridian.svg">
+The project is two parts with different natures. The website is built in Webflow — design, layout, CMS collections (Services, Case Studies with ROI metric fields, Testimonials, Team), and responsiveness all handled in the Webflow Designer. No hand-coded frontend. The engineering signal is not a custom UI — it's the clean integration of the one custom feature.
+
+That feature is a Vercel serverless function (`/api/consult`) that the Webflow form posts to. The function validates the submission, applies rate limiting and a honeypot field to block spam, then makes a single structured call to Gemini. Gemini returns two things: a warm, personalised acknowledgement shown to the visitor, and a concise internal routing summary (category, urgency, suggested service) that goes to the business. Optional Zapier/Make automation can pipe the lead and summary to a CRM.
+</Architecture>
+
+<Decisions subtitle="Two decisions that kept this project honest.">
+
+<Decision
+  number="01"
+  title="Webflow over a custom-coded frontend"
+  chose="Webflow for the entire site — design, layout, CMS, responsiveness"
+  rejected="Next.js custom frontend, Astro, static site generator"
+  why="A marketing site for a professional services firm needs to be maintainable by a non-technical owner. Webflow's CMS means the client can update case studies, team members, and services without a developer. A hand-coded frontend would produce a better developer portfolio piece but a worse product. Presenting this honestly — as a Webflow build — is the more defensible position: it shows judgment about tool selection, not just code output."
+/>
+
+<Decision
+  number="02"
+  title="Stateless one-shot function over a multi-turn chatbot"
+  chose="Stateless serverless function: validate → call Gemini → return acknowledgement + summary"
+  rejected="Stateful chatbot, multi-turn conversation, streaming response"
+  why="The brief was an AI-enhanced contact form, not a chatbot. Scope creep toward a multi-turn experience would have multiplied complexity (session state, conversation history, moderation) without improving the conversion metric. A visitor submitting a contact form wants confirmation, not a conversation. The one-shot constraint also makes the function trivially testable — one input, one deterministic output shape."
+/>
+
+</Decisions>
+
+<Code title="The consultation endpoint">
+{`// api/consult.ts
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const ROUTING_PROMPT = \`You are an intake assistant for a professional services firm.
+Given an enquiry, return a JSON object with two fields:
+- acknowledgement: a warm, personalised 2-sentence response for the visitor
+- routing: { category, urgency, suggestedService }
+Respond ONLY with valid JSON.\`;
+
+export default async function handler(req: Request) {
+  // Rate limit: 10 req/min per IP
+  if (isRateLimited(req)) return new Response("Too Many Requests", { status: 429 });
+
+  const { name, email, enquiry, _honeypot } = await req.json();
+  if (_honeypot) return new Response("OK", { status: 200 }); // silent discard
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  const result = await model.generateContent(
+    \`\${ROUTING_PROMPT}\n\nEnquiry from \${name}: \${enquiry}\`
+  );
+
+  const { acknowledgement, routing } = JSON.parse(result.response.text());
+  // Pipe routing to CRM via webhook (optional)
+  await notifyCRM({ name, email, routing });
+
+  return Response.json({ acknowledgement });
+}`}
+</Code>
+
+<Outcomes>
+<Works>
+- Webflow site with CMS-driven Services, Case Studies (with ROI metric fields), Testimonials, Team
+- Contact form generates personalised visitor acknowledgement via Gemini
+- Internal routing summary (category, urgency, suggested service) delivered to business
+- Rate limiting and honeypot spam protection on the serverless function
+- Calendly embed for appointment booking — no custom calendar built
+- Reskinnable to a new industry via Webflow brand tokens + CMS content swap
+</Works>
+<DoesntYet>
+- Zapier/Make CRM pipe is optional and not configured in the demo deploy
+- No real-time availability calendar — deferred by design
+- Client portal — explicitly out of scope for v1
+- The routing summary is not persisted anywhere in the demo — production use needs a CRM destination
+</DoesntYet>
+</Outcomes>
+
+<Lessons>
+Presenting a Webflow project honestly is better than obscuring it. The first instinct was to lead with "serverless AI integration" and bury that the site is no-code. The better framing — and the one that actually signals judgment — is to say upfront: Webflow was the right tool for the site, and this is what the one custom build looks like. Buyers who understand tool selection will respect that more than a hand-coded static site that doesn't need to exist.
+
+The one-shot constraint was the right guardrail. There was a 20-minute temptation to add streaming and a follow-up question turn. Cutting that kept the function under 80 lines and the test surface trivial. Scope discipline on a one-day build is the whole game.
+
+Gemini was the right call for this project (good structured output, fast, low cost per call), but if this were a production deployment with compliance requirements, I'd want explicit content filtering on the enquiry before it reaches the model. The honeypot and rate limit handle spam volume; they don't handle adversarial prompt injection in the enquiry field.
+</Lessons>

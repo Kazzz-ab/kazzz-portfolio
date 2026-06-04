@@ -1,0 +1,64 @@
+<svg viewBox="0 0 560 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="haqmart-title haqmart-desc">
+  <title id="haqmart-title">Haque Mart Architecture</title>
+  <desc id="haqmart-desc">Headless storefront: Next.js frontend consuming WPGraphQL over WordPress+WooCommerce, with pluggable PaymentProvider interface</desc>
+
+  <!-- Browser -->
+  <rect x="20" y="80" width="90" height="80" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="65" y="115" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">browser</text>
+  <text x="65" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">+ cart</text>
+  <text x="65" y="141" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">state</text>
+
+  <!-- Arrow -->
+  <line x1="111" y1="120" x2="140" y2="120" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="140,117 145,120 140,123" fill="#3A3A38"/>
+
+  <!-- Next.js frontend -->
+  <rect x="146" y="60" width="110" height="120" rx="2" stroke="#B89968" stroke-width="0.5"/>
+  <text x="201" y="92" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">Next.js 15</text>
+  <text x="201" y="105" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">App Router</text>
+  <line x1="156" y1="112" x2="246" y2="112" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="201" y="127" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">RSC pages</text>
+  <text x="201" y="140" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">+ cart ctx</text>
+  <text x="201" y="153" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">+ wishlist</text>
+  <text x="201" y="166" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">ctx</text>
+
+  <!-- Arrow to WPGraphQL -->
+  <line x1="257" y1="100" x2="330" y2="100" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="330,97 335,100 330,103" fill="#3A3A38"/>
+
+  <!-- WPGraphQL -->
+  <rect x="336" y="72" width="96" height="56" rx="2" stroke="#B89968" stroke-width="0.5"/>
+  <text x="384" y="96" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">WPGraphQL</text>
+  <text x="384" y="109" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">typed queries</text>
+  <text x="384" y="122" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">+ codegen</text>
+
+  <!-- Arrow to WooCommerce -->
+  <line x1="433" y1="100" x2="460" y2="100" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="460,97 465,100 460,103" fill="#3A3A38"/>
+
+  <!-- WordPress + WooCommerce -->
+  <rect x="466" y="60" width="74" height="80" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="503" y="87" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">WordPress</text>
+  <text x="503" y="100" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">+</text>
+  <text x="503" y="113" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">WooCommerce</text>
+  <text x="503" y="130" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">products</text>
+  <text x="503" y="143" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">+ orders</text>
+
+  <!-- Mock fallback arrow -->
+  <line x1="201" y1="181" x2="201" y2="205" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <polygon points="198,202 201,208 204,202" fill="#3A3A38"/>
+  <rect x="151" y="207" width="100" height="26" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="201" y="224" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">mock fallback</text>
+
+  <!-- PaymentProvider abstraction -->
+  <rect x="146" y="28" width="110" height="26" rx="2" stroke="#B89968" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <text x="201" y="45" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">PaymentProvider</text>
+
+  <!-- Provider options -->
+  <text x="286" y="16" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">Stripe</text>
+  <text x="336" y="16" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">bKash</text>
+  <text x="390" y="16" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">SSLCommerz</text>
+  <line x1="256" y1="28" x2="286" y2="20" stroke="#3A3A38" stroke-width="0.5"/>
+  <line x1="256" y1="35" x2="336" y2="18" stroke="#3A3A38" stroke-width="0.5"/>
+  <line x1="256" y1="41" x2="388" y2="18" stroke="#3A3A38" stroke-width="0.5"/>
+</svg>
