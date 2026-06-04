@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navItems = [
+  { href: "/about", label: "about" },
   { href: "/ai-ml", label: "ai/ml" },
   { href: "/business", label: "business" },
-  { href: "/about", label: "about" },
   { href: "mailto:kaziabrarulh@gmail.com", label: "contact" },
 ];
 
