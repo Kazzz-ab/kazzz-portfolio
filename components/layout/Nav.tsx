@@ -26,12 +26,12 @@ export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Close mobile drawer whenever the route changes (e.g. browser back)
   useEffect(() => { setOpen(false); }, [pathname]);
 
   return (
     <>
       <nav className="flex justify-between items-center pb-8">
+        {/* Wordmark */}
         <Link
           href="/"
           className="font-mono text-[12px] tracking-[0.04em] text-default hover:text-primary transition-colors duration-150"
@@ -39,49 +39,40 @@ export function Nav() {
           kazi a. haque
         </Link>
 
-        {/* Desktop nav */}
-        <ul className="hidden md:flex items-center gap-5">
+        {/* Desktop: nav links + theme toggle grouped together on the right */}
+        <div className="hidden md:flex items-center gap-5">
           {navItems.map(({ href, label }) => {
             const isActive = href.startsWith("/") && pathname.startsWith(href);
             const accent = isActive ? accentForPath(pathname) : "";
             return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={`font-mono text-[11px] tracking-[0.04em] transition-colors duration-150 ${
-                    isActive ? accent : "text-muted hover:text-default"
-                  }`}
-                >
-                  {label}
-                </Link>
-              </li>
+              <Link
+                key={href}
+                href={href}
+                className={`font-mono text-[11px] tracking-[0.04em] transition-colors duration-150 ${
+                  isActive ? accent : "text-muted hover:text-default"
+                }`}
+              >
+                {label}
+              </Link>
             );
           })}
-        </ul>
-
-        {/* Desktop theme toggle */}
-        <div className="hidden md:flex items-center">
+          {/* Divider */}
+          <span className="w-px h-3 bg-ghost" />
           <ThemeToggle />
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Mobile: hamburger only */}
         <button
           className="md:hidden flex flex-col gap-1.5 p-1"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
-          <span
-            className="block h-px w-5 bg-muted transition-all duration-200"
-            style={{ transform: open ? "rotate(45deg) translate(4px, 4px)" : "none" }}
-          />
-          <span
-            className="block h-px w-5 bg-muted transition-all duration-200"
-            style={{ opacity: open ? 0 : 1 }}
-          />
-          <span
-            className="block h-px w-5 bg-muted transition-all duration-200"
-            style={{ transform: open ? "rotate(-45deg) translate(4px, -4px)" : "none" }}
-          />
+          <span className="block h-px w-5 bg-muted transition-all duration-200"
+            style={{ transform: open ? "rotate(45deg) translate(4px, 4px)" : "none" }} />
+          <span className="block h-px w-5 bg-muted transition-all duration-200"
+            style={{ opacity: open ? 0 : 1 }} />
+          <span className="block h-px w-5 bg-muted transition-all duration-200"
+            style={{ transform: open ? "rotate(-45deg) translate(4px, -4px)" : "none" }} />
         </button>
       </nav>
 
@@ -89,16 +80,19 @@ export function Nav() {
       {open && (
         <div
           className="md:hidden fixed inset-0 z-50 flex flex-col"
-          style={{ background: "rgba(10,10,11,0.97)", backdropFilter: "blur(8px)" }}
+          style={{ background: "var(--color-base)", backdropFilter: "blur(8px)" }}
         >
           <div className="flex justify-between items-center px-7 pt-7 pb-8">
             <Link href="/" onClick={() => setOpen(false)}
               className="font-mono text-[12px] tracking-[0.04em] text-default">
               kazi a. haque
             </Link>
-            <button onClick={() => setOpen(false)} className="font-mono text-[11px] text-muted">
-              ✕ close
-            </button>
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <button onClick={() => setOpen(false)} className="font-mono text-[11px] text-muted">
+                ✕
+              </button>
+            </div>
           </div>
           <nav className="flex flex-col gap-2 px-7">
             {navItems.map(({ href, label }) => (
@@ -113,8 +107,7 @@ export function Nav() {
               </Link>
             ))}
           </nav>
-          <div className="mt-auto px-7 pb-8 flex flex-col gap-4">
-            <ThemeToggle />
+          <div className="mt-auto px-7 pb-8">
             <p className="font-mono text-[10px] tracking-[0.08em] text-faint">
               full-stack engineer · dhaka, bd
             </p>
