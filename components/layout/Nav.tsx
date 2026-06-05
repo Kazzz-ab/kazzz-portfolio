@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { href: "/about", label: "about" },
@@ -58,6 +59,11 @@ export function Nav() {
           })}
         </ul>
 
+        {/* Desktop theme toggle */}
+        <div className="hidden md:flex items-center">
+          <ThemeToggle />
+        </div>
+
         {/* Mobile hamburger */}
         <button
           className="md:hidden flex flex-col gap-1.5 p-1"
@@ -107,7 +113,8 @@ export function Nav() {
               </Link>
             ))}
           </nav>
-          <div className="mt-auto px-7 pb-8">
+          <div className="mt-auto px-7 pb-8 flex flex-col gap-4">
+            <ThemeToggle />
             <p className="font-mono text-[10px] tracking-[0.08em] text-faint">
               full-stack engineer · dhaka, bd
             </p>

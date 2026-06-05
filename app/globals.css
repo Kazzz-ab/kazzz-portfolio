@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ─── Design-system tokens ──────────────────────────────────────────────── */
+/* ─── Design-system tokens (dark defaults) ──────────────────────────────── */
 @theme {
   /* Backgrounds */
   --color-base:    #0A0A0B;
@@ -29,11 +29,42 @@
   --font-mono: var(--font-jetbrains);
 }
 
-/* Semi-transparent tokens used via CSS vars (Tailwind arbitrary values) */
+/* Semi-transparent tokens */
 :root {
-  --surface-inset:  rgba(255, 255, 255, 0.02);
-  --border-subtle:  rgba(255, 255, 255, 0.06);
-  --border-card:    rgba(255, 255, 255, 0.08);
+  --surface-inset: rgba(255, 255, 255, 0.02);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-card:   rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Light theme overrides ─────────────────────────────────────────────── */
+/* next-themes adds class="light" to <html> */
+.light {
+  color-scheme: light;
+
+  /* Tailwind v4 @theme variables are CSS custom properties — overridable */
+  --color-base:    #F7F7F4;
+  --color-card:    #EFEFEB;
+  --color-code-bg: #E8E8E4;
+
+  --color-primary: #0A0A0B;
+  --color-default: #1C1C1A;
+  --color-body:    #4A4A44;
+  --color-muted:   #6A6A62;
+  --color-faint:   #9A9A92;
+  --color-ghost:   #C5C5BF;
+
+  /* Slightly deeper accents for contrast on light */
+  --color-accent-ai:    #3A6080;
+  --color-accent-biz:   #7A5A28;
+  --color-accent-about: #4A6A4A;
+
+  --color-shipped:  #4A6A4A;
+  --color-inflight: #7A5A28;
+
+  /* Light semi-transparent tokens */
+  --surface-inset: rgba(0, 0, 0, 0.025);
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --border-card:   rgba(0, 0, 0, 0.09);
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────────── */
@@ -42,14 +73,22 @@ html {
 }
 
 body {
-  background-color: #0A0A0B;
-  color: #E8E8E3;
+  background-color: var(--color-base);
+  color: var(--color-default);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Animations */
+/* Smooth theme transitions on key surfaces */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* ─── Animations ────────────────────────────────────────────────────────── */
 @keyframes fadeDown {
   0%   { opacity: 0; transform: translateY(-4px); }
   50%  { opacity: 1; }
@@ -61,7 +100,7 @@ body {
   50%       { opacity: 1;   transform: scale(1.4); }
 }
 
-/* Respect reduced motion */
+/* Respect reduced motion — disable transitions and animations */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

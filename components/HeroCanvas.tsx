@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 import * as THREE from "three";
 
 export function HeroCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+
+    const isLight = resolvedTheme === "light";
 
     // Skip canvas on mobile — CSS gradient fallback handles it
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -37,9 +41,13 @@ export function HeroCanvas() {
     const geo = new THREE.SphereGeometry(0.06, 5, 5);
     const particles: { mesh: THREE.Mesh; vx: number; vy: number }[] = [];
 
+    const accentColor  = isLight ? 0x3a6080 : 0x6b8eae;
+    const neutralColor = isLight ? 0xc0c0b8 : 0x3a3a3a;
+    const lineColor    = isLight ? 0x3a6080 : 0x6b8eae;
+
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const mat = new THREE.MeshBasicMaterial({
-        color: Math.random() > 0.6 ? 0x6b8eae : 0x3a3a3a,
+        color: Math.random() > 0.6 ? accentColor : neutralColor,
         transparent: true,
         opacity: Math.random() * 0.55 + 0.25,
       });
@@ -59,7 +67,7 @@ export function HeroCanvas() {
     }
 
     const lineMat = new THREE.LineBasicMaterial({
-      color: 0x6b8eae,
+      color: lineColor,
       transparent: true,
       opacity: 0.18,
     });
@@ -146,7 +154,7 @@ export function HeroCanvas() {
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
       renderer.dispose();
     };
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <div
