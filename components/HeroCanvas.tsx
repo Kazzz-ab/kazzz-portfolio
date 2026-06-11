@@ -3,11 +3,38 @@
 import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import * as THREE from "three";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function HeroCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const { resolvedTheme } = useTheme();
+
+  // Dissolve the particle field as the hero scrolls away.
+  // Lives here (not the page) so the target exists — this component is
+  // dynamically imported and mounts after the page's intro effect runs.
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount || !mount.parentElement) return;
+    const tween = gsap.to(mount, {
+      opacity: 0,
+      y: 40,
+      ease: "none",
+      scrollTrigger: {
+        trigger: mount.parentElement,
+        start: "top top",
+        end: "75% top",
+        scrub: true,
+      },
+    });
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, []);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -103,8 +130,7 @@ export function HeroCanvas() {
     let frameId: number;
     let li = 0;
 
-    const animate = () => {
-      frameId = requestAnimationFrame(animate);
+    const tick = () => {
       linePool.forEach((l) => (l.visible = false));
       li = 0;
 
@@ -137,7 +163,14 @@ export function HeroCanvas() {
             pos[4] = particles[j].mesh.position.y;
             pos[5] = particles[j].mesh.position.z;
             line.geometry.attributes.position.needsUpdate = true;
-            (line.material as THREE.LineBasicMaterial).opacity = (1 - d / CONNECT_DIST) * 0.26;
+
+            // Lines close to the cursor glow a touch brighter
+            const mx = (pos[0] + pos[3]) / 2 - mouseRef.current.x;
+            const my = (pos[1] + pos[4]) / 2 - mouseRef.current.y;
+            const md = Math.sqrt(mx * mx + my * my);
+            const boost = md < 9 ? 1 + (1 - md / 9) * 0.8 : 1;
+            (line.material as THREE.LineBasicMaterial).opacity =
+              (1 - d / CONNECT_DIST) * 0.26 * boost;
             line.visible = true;
           }
         }
@@ -145,7 +178,18 @@ export function HeroCanvas() {
 
       renderer.render(scene, camera);
     };
-    animate();
+
+    const animate = () => {
+      frameId = requestAnimationFrame(animate);
+      tick();
+    };
+
+    // Reduced motion: render one static constellation frame, no loop
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      tick();
+    } else {
+      animate();
+    }
 
     return () => {
       cancelAnimationFrame(frameId);
@@ -159,6 +203,7 @@ export function HeroCanvas() {
   return (
     <div
       ref={mountRef}
+      data-hero-canvas
       className="absolute inset-0"
       style={{ pointerEvents: "none", zIndex: 0 }}
     />

@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/Footer";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StackChip } from "@/components/ui/StackChip";
+import { Reveal } from "@/components/ui/Reveal";
+import { ReadingProgress } from "@/components/ReadingProgress";
 import { getCaseStudyBySlug, getAllCaseStudies } from "@/lib/content";
 import { MDXContent } from "@/components/MDXContent";
 
@@ -79,37 +81,46 @@ export default async function CaseStudyPage({ params }: Props) {
 
   return (
     <PageContainer>
+      <ReadingProgress color={cs.track === "ai-ml" ? "#6B8EAE" : "#B89968"} />
       <Nav />
 
       {/* Hero */}
-      <div className="pb-5 mb-5" style={{ borderBottom: "0.5px solid var(--border-subtle)" }}>
-        <Link
-          href={trackHref[cs.track]}
-          className="font-mono text-[11px] text-muted hover:text-default transition-colors duration-150 block mb-5"
-        >
-          ← back to {trackLabel[cs.track]}
-        </Link>
+      <div className="relative pb-5 mb-5">
+        <Reveal>
+          <Link
+            href={trackHref[cs.track]}
+            className="font-mono text-[11px] text-muted hover:text-default transition-colors duration-150 block mb-5"
+          >
+            ← back to {trackLabel[cs.track]}
+          </Link>
 
-        <div className="flex items-baseline gap-3 mb-2">
-          <span className={`font-mono text-[11px] tracking-[0.1em] ${accent}`}>
-            case study · {String(cs.order).padStart(2, "0")}
-          </span>
-          <span className="font-mono text-[11px] text-faint">{cs.domain.toLowerCase()}</span>
-        </div>
+          <div className="flex items-baseline gap-3 mb-2">
+            <span className={`font-mono text-[11px] tracking-[0.1em] ${accent}`}>
+              case study · {String(cs.order).padStart(2, "0")}
+            </span>
+            <span className="font-mono text-[11px] text-faint">{cs.domain.toLowerCase()}</span>
+          </div>
+        </Reveal>
 
-        <h1 className="text-[42px] font-medium tracking-[-0.02em] text-primary leading-[1.05] mb-3.5">
+        <Reveal as="h1" delay={60} className="text-[34px] md:text-[42px] font-medium tracking-[-0.02em] text-primary leading-[1.05] mb-3.5">
           {cs.title}
-        </h1>
-        <p className="text-[15px] text-body max-w-[480px] leading-[1.55]">{cs.summary}</p>
+        </Reveal>
+        <Reveal as="p" delay={120} className="text-[15px] text-body max-w-[480px] leading-[1.55]">
+          {cs.summary}
+        </Reveal>
+        <Reveal
+          variant="rule"
+          delay={150}
+          className="absolute bottom-0 left-0 w-full h-px"
+          style={{ background: "var(--border-subtle)" }}
+        />
       </div>
 
       {/* Meta strip */}
-      <div
-        className="grid gap-4 pb-7 mb-8"
-        style={{
-          gridTemplateColumns: "repeat(4, 1fr)",
-          borderBottom: "0.5px solid var(--border-subtle)",
-        }}
+      <Reveal
+        delay={180}
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-7 mb-8"
+        style={{ borderBottom: "0.5px solid var(--border-subtle)" }}
       >
         {[
           { label: "status", value: cs.status, isStatus: true },
@@ -136,34 +147,36 @@ export default async function CaseStudyPage({ params }: Props) {
         <div>
           <p className="font-mono text-[10px] tracking-[0.08em] text-faint mb-1">artifacts</p>
           <div className="flex gap-3 flex-wrap">
-            {artifacts.length > 0 ? (
-              artifacts.map(({ label, href }) => (
-                <a
-                  key={`${label}-${href}`}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[13px] text-default hover:text-primary transition-colors duration-150"
-                >
-                  {label}
-                </a>
-              ))
-            ) : (
-              <span className="text-[13px] text-faint">—</span>
-            )}
+            {artifacts.map(({ label, href }) => (
+              <a
+                key={`${label}-${href}`}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[13px] text-default hover:text-primary transition-colors duration-150"
+              >
+                {label}
+              </a>
+            ))}
+            <a
+              href={`mailto:kaziabrarulh@gmail.com?subject=${encodeURIComponent(`Demo request — ${cs.title}`)}`}
+              className="text-[13px] text-default hover:text-primary transition-colors duration-150"
+            >
+              ask for demo
+            </a>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* Stack */}
-      <div className="flex flex-wrap gap-1.5 mb-10">
+      <Reveal delay={240} className="flex flex-wrap gap-1.5 mb-10">
         {cs.primary_stack.map((tech) => (
           <StackChip key={tech} label={tech} />
         ))}
         {cs.ai_layer?.map((tech) => (
           <StackChip key={tech} label={tech} />
         ))}
-      </div>
+      </Reveal>
 
       {/* Case study body */}
       <div className="space-y-10 mb-10" style={{ borderTop: "0.5px solid var(--border-subtle)", paddingTop: "32px" }}>
@@ -189,10 +202,14 @@ export default async function CaseStudyPage({ params }: Props) {
             </div>
             <Link
               href={`/work/${nextProject.slug}`}
-              className="font-mono text-[11px] text-default px-3.5 py-2 rounded-sm hover:text-primary transition-colors duration-150"
-              style={{ border: "0.5px solid var(--border-card)" }}
+              className={`group font-mono text-[11px] text-default px-3.5 py-2.5 rounded-sm hover:text-primary transition-all duration-200 border-[0.5px] border-[color:var(--border-card)] ${
+                nextProject.track === "ai-ml"
+                  ? "hover:border-[#6B8EAE66] hover:bg-[#6B8EAE0A]"
+                  : "hover:border-[#B8996866] hover:bg-[#B899680A]"
+              }`}
             >
-              read →
+              read{" "}
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">→</span>
             </Link>
           </div>
 
@@ -203,21 +220,25 @@ export default async function CaseStudyPage({ params }: Props) {
             >
               ← back to {trackLabel[cs.track]}
             </Link>
-            {artifacts.length > 0 && (
-              <div className="flex gap-4.5">
-                {artifacts.map(({ label, href }) => (
-                  <a
-                    key={`${label}-${href}`}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-[11px] text-muted hover:text-default transition-colors duration-150"
-                  >
-                    {label}
-                  </a>
-                ))}
-              </div>
-            )}
+            <div className="flex gap-4.5">
+              {artifacts.map(({ label, href }) => (
+                <a
+                  key={`${label}-${href}`}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-[11px] text-muted hover:text-default transition-colors duration-150"
+                >
+                  {label}
+                </a>
+              ))}
+              <a
+                href={`mailto:kaziabrarulh@gmail.com?subject=${encodeURIComponent(`Demo request — ${cs.title}`)}`}
+                className="font-mono text-[11px] text-muted hover:text-default transition-colors duration-150"
+              >
+                ask for demo
+              </a>
+            </div>
           </div>
         </div>
       )}

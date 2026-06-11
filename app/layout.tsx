@@ -43,6 +43,8 @@ export default function RootLayout({
         <Providers>
           <SmoothScroll>{children}</SmoothScroll>
         </Providers>
+        {/* Static film grain — texture only, zero per-frame cost */}
+        <div aria-hidden="true" className="grain" />
       </body>
     </html>
   );

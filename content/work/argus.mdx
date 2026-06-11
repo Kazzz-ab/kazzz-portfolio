@@ -1,8 +1,8 @@
 ---
 title: Argus
 slug: argus
-summary: Autonomous company research agent that streams its tool calls and reasoning live.
-problem_oneliner: Company research is a 30-minute task that should be a 30-second task.
+summary: Autonomous company research agent that turns a company name into a cited brief — streaming every step of its work live.
+problem_oneliner: Company research is a 30-minute task that should be a 30-second task — without giving up grounding.
 order: 2
 featured: false
 status: in-flight
@@ -11,10 +11,11 @@ role: Solo full-stack
 timeline: In progress
 domain: Autonomous agents
 client_type: Portfolio
-primary_stack: [NestJS, TypeScript, Claude API, SSE]
-ai_layer: [Claude claude-sonnet-4-6 tool use, SSE streaming, FinSight retrieval tools]
+primary_stack: [Next.js, TypeScript, Claude API, Zod]
+ai_layer: [Claude Opus 4.5 tool use, SSE streaming, MCP server]
 deployment: Vercel
-tags: [agents, tool-use, streaming-sse, rag]
+architecture_diagram: /diagrams/argus.svg
+tags: [agents, tool-use, streaming-sse, mcp]
 related_work: [finsight]
 related_writing: []
 embedding_ready: false
@@ -22,4 +23,116 @@ embedding_priority: normal
 accent_color: "#6B8EAE"
 ---
 
-{/* Case study body — Phase 6 */}
+<Problem>
+Researching a company is a 30-minute ritual: open SEC EDGAR, skim the latest 10-K, pull a few numbers, check recent news, assemble notes. An agent can compress that to 30 seconds — but speed is worthless if you can't see where the answers came from. An autonomous agent that works silently and returns a polished paragraph is exactly as trustworthy as a generic chatbot, which is to say: not at all in this domain.
+
+Argus is built around one idea: trust through transparency. The agent streams its entire working process live — every plan step, every tool call, every result count — while it researches. The deliverable is a structured brief where every factual claim traces to a tool result the agent actually received. Argus is in active development; everything below describes what runs today.
+</Problem>
+
+<Architecture diagram="/diagrams/argus.svg">
+The core is a hand-rolled agent loop — about 130 lines, no framework. Claude (Opus 4.5) receives the company name, a system prompt with hard grounding rules, and four tools whose Zod schemas are converted to JSON Schema at call time. The loop runs tool-use turns under two guardrails: a 10-step cap and a 60-second timeout. Three tools gather evidence — `search_filings` (full-text search over SEC EDGAR 10-K/10-Q/8-K filings), `get_financials` (structured metrics from EDGAR's XBRL API, with ordered fallback lists because companies tag the same concept under different names), and `web_search` (Google News RSS — no API key). The fourth, `compose_brief`, is the terminal tool: calling it ends the loop and its schema-validated input *is* the deliverable. Tool failures are returned to the model as `is_error` results, so it can adapt instead of crashing the run.
+
+Everything observable about the run flows through one emitter. The Next.js route at `/api/research` wraps the loop in a `ReadableStream` and pushes each `ActivityEvent` (plan, tool_start, tool_end, error, done) as a server-sent event; the React client consumes it with a plain `EventSource` and renders a split view — live activity feed on the left, finished brief with citations on the right. The same tool implementations are exposed two more ways: a CLI runner that prints the identical event stream to stdout for debugging, and an MCP server over stdio, so Claude Code or Claude Desktop can call Argus's tools directly. One tool definition, three surfaces.
+</Architecture>
+
+<Decisions subtitle="Four calls that define Argus — in order of how much they shaped the build.">
+
+<Decision
+  number="01"
+  title="Hand-rolled agent loop over an agent framework"
+  chose="A ~130-line while-loop owning the Claude tool-use cycle directly"
+  rejected="LangChain/LangGraph, Vercel AI SDK agent abstractions"
+  why="The loop is the product. Argus's entire value is showing its work, which means owning exactly what gets emitted at every step — when a tool starts, what it was asked, what came back, why the loop ended. Frameworks abstract precisely the layer that needed to be visible. The trade is writing step caps, timeouts, and error feedback by hand; at 130 lines, that's a cost worth paying for a loop that can be read top to bottom."
+/>
+
+<Decision
+  number="02"
+  title="A terminal tool as the output contract"
+  chose="compose_brief — a tool whose Zod-validated input is the final brief, and whose invocation ends the loop"
+  rejected="Free-text answers parsed after the fact, prompt-instructed JSON formatting"
+  why="Same principle as FinSight's cite-or-refuse schema: contracts beat instructions. The model doesn't 'write a report' — it must call compose_brief with overview, financials, developments, risks, and a citations array, all schema-checked before anything reaches the client. Termination becomes deterministic (the loop ends when the contract is fulfilled), and the UI renders a typed Brief instead of parsing prose. If the model stops without composing, a fallback brief is built from its text rather than failing the run."
+/>
+
+<Decision
+  number="03"
+  title="SEC EDGAR + news RSS over paid data APIs"
+  chose="EDGAR full-text search, EDGAR XBRL company-concept API, Google News RSS — zero data API keys"
+  rejected="Paid market-data APIs, web scraping"
+  why="EDGAR is the primary source — filings are what paid APIs repackage. Grounding claims in it directly means citations point at regulatory documents, not aggregator summaries, and anyone can run the project with only an Anthropic key. The cost is EDGAR's quirks: a strict User-Agent requirement, a 10-requests/second ceiling, and XBRL concept-name roulette — 'revenue' alone hides behind five different us-gaap tags, which is why get_financials walks an ordered fallback list per metric. The constraint it imposes: US-listed companies only, for now."
+/>
+
+<Decision
+  number="04"
+  title="One tool definition, three surfaces"
+  chose="A shared AgentTool shape (name, description, Zod schema, run) consumed by the agent loop, a CLI runner, and an MCP stdio server"
+  rejected="Separate tool adapters per surface, duplicating validation logic"
+  why="Zod earns its place twice: it validates inputs at runtime and generates the JSON Schema that both the Claude API and MCP clients need. Because tools take an emit callback rather than writing to a UI, the web app streams events over SSE, the CLI prints the same events to stdout, and the MCP server passes a silent emitter — no tool knows or cares who is calling it. Registering Argus in Claude Code took zero changes to the tools themselves."
+/>
+
+</Decisions>
+
+<Code title="The loop, trimmed to its skeleton">
+{`// argus/src/lib/agent/orchestrator.ts (trimmed)
+while (steps < MAX_STEPS) {
+  if (Date.now() - startTime > TIMEOUT_MS) throw new AgentTimeoutError();
+  steps++;
+
+  const response = await client.messages.create({
+    model: "claude-opus-4-5",
+    max_tokens: 4096,
+    system: SYSTEM_PROMPT,   // ground every claim; never fabricate; no advice
+    tools,                   // Zod schemas -> JSON Schema via z.toJSONSchema
+    messages,
+  });
+
+  const toolUses = response.content.filter((b) => b.type === "tool_use");
+  if (response.stop_reason === "end_turn" || toolUses.length === 0) {
+    return fallbackBrief(response);  // stopped without composing — degrade, don't fail
+  }
+
+  messages.push({ role: "assistant", content: response.content });
+
+  for (const block of toolUses) {
+    const tool = registeredTools.find((t) => t.name === block.name);
+    const input = tool.inputSchema.parse(block.input);
+    const result = await tool.run(input, emit);  // emit() feeds the live SSE feed
+
+    // compose_brief is terminal — its validated input IS the deliverable
+    if (block.name === "compose_brief") return result as Brief;
+
+    toolResults.push({
+      type: "tool_result",
+      tool_use_id: block.id,
+      content: JSON.stringify(result),
+    });
+  }
+  messages.push({ role: "user", content: toolResults });
+}
+throw new StepCapError();`}
+</Code>
+
+<Outcomes>
+<Works>
+- Full agent run end-to-end: plan → filings → financials → news → composed brief, streamed live
+- SSE activity feed showing every tool call as it happens, with a typed event protocol
+- EDGAR XBRL metrics (revenue, net income, EPS, assets, debt, operating cash flow) with per-concept fallback resolution
+- Step cap and timeout guardrails; tool errors fed back to the model as recoverable results
+- MCP server exposing the same four tools over stdio to Claude Code / Claude Desktop
+- CLI runner that prints the identical event stream for debugging agent behaviour
+</Works>
+<DoesntYet>
+- Server-side citation validation — citations are model-assembled, not yet verified against tool results the way FinSight rejects unknown chunk IDs
+- Persistence — briefs aren't saved; refreshing discards the run
+- CIK resolution uses EDGAR full-text search as a heuristic; a ticker→CIK mapping table would be sturdier
+- Free cash flow is an operating-cash-flow proxy — capex isn't subtracted yet
+- Non-US companies — every grounded source assumes an SEC registrant
+</DoesntYet>
+</Outcomes>
+
+<Lessons>
+Designing around an emit callback from day one was the highest-leverage call in the project. Because every tool reports through the same emitter, the live UI feed, the CLI debug output, and the silent MCP mode are the same code path with different listeners. Debugging an agent by watching its event stream is categorically better than reading logs after the fact.
+
+The citation gap is the honest difference between Argus and FinSight today. FinSight enforces grounding architecturally — a response citing an unknown chunk is rejected server-side. Argus instructs grounding in the system prompt and structures it in the compose_brief schema, but doesn't yet verify that each citation maps to a tool result the agent actually received. The plumbing exists (every tool result carries its source); wiring the validator is the next milestone, and the reason this project is marked in-flight rather than shipped.
+
+Free data is free; robust data is work. EDGAR's full-text endpoint is undocumented, its XBRL concept names vary company by company, and Google News RSS returns redirect URLs. Roughly a third of Argus's code is absorbing that mess so the agent sees clean, typed tool results — which is about the right ratio for any system whose value depends on its inputs being trustworthy.
+</Lessons>

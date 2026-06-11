@@ -14,6 +14,7 @@ client_type: Portfolio
 primary_stack: [Webflow, TypeScript, Vercel Serverless]
 ai_layer: [Gemini API]
 deployment: Vercel + Webflow
+repo_url: https://github.com/Kazzz-ab/Meridian
 architecture_diagram: /diagrams/meridian.svg
 tags: [webflow, architecture]
 related_work: []
@@ -107,7 +108,7 @@ export default async function handler(req: Request) {
 <Lessons>
 Presenting a Webflow project honestly is better than obscuring it. The first instinct was to lead with "serverless AI integration" and bury that the site is no-code. The better framing — and the one that actually signals judgment — is to say upfront: Webflow was the right tool for the site, and this is what the one custom build looks like. Buyers who understand tool selection will respect that more than a hand-coded static site that doesn't need to exist.
 
-The one-shot constraint was the right guardrail. There was a 20-minute temptation to add streaming and a follow-up question turn. Cutting that kept the function under 80 lines and the test surface trivial. Scope discipline on a one-day build is the whole game.
+The one-shot constraint was the right guardrail. There was a 20-minute temptation to add streaming and a follow-up question turn. Cutting that kept the function under 80 lines and the test surface trivial. On a build this small, scope discipline is the whole game.
 
 Gemini was the right call for this project (good structured output, fast, low cost per call), but if this were a production deployment with compliance requirements, I'd want explicit content filtering on the enquiry before it reaches the model. The honeypot and rate limit handle spam volume; they don't handle adversarial prompt injection in the enquiry field.
 </Lessons>

@@ -24,12 +24,12 @@ function AiMotif() {
       <line x1="20" y1="55" x2="80" y2="50" stroke="#3A3A38" strokeWidth="0.5" />
       <line x1="40" y1="30" x2="100" y2="25" stroke="#3A3A38" strokeWidth="0.5" />
       <line x1="100" y1="25" x2="80" y2="50" stroke="#3A3A38" strokeWidth="0.5" />
-      <line x1="20" y1="55" x2="60" y2="75" stroke="#6B8EAE" strokeWidth="0.5" strokeDasharray="2 2" />
-      <circle cx="40" cy="30" r="3" fill="#6B8EAE" />
-      <circle cx="80" cy="50" r="4" fill="#6B8EAE" />
-      <circle cx="60" cy="75" r="3" fill="#3A3A38" />
-      <circle cx="20" cy="55" r="2.5" fill="#3A3A38" />
-      <circle cx="100" cy="25" r="2.5" fill="#3A3A38" />
+      <line className="motif-dash" x1="20" y1="55" x2="60" y2="75" stroke="#6B8EAE" strokeWidth="0.5" strokeDasharray="2 2" />
+      <circle className="motif-node" cx="40" cy="30" r="3" fill="#6B8EAE" />
+      <circle className="motif-node" style={{ animationDelay: "150ms" }} cx="80" cy="50" r="4" fill="#6B8EAE" />
+      <circle className="motif-node" style={{ animationDelay: "300ms" }} cx="60" cy="75" r="3" fill="#3A3A38" />
+      <circle className="motif-node" style={{ animationDelay: "450ms" }} cx="20" cy="55" r="2.5" fill="#3A3A38" />
+      <circle className="motif-node" style={{ animationDelay: "600ms" }} cx="100" cy="25" r="2.5" fill="#3A3A38" />
     </svg>
   );
 }
@@ -39,16 +39,20 @@ function BizMotif() {
   const highlighted = [[1,0],[2,1]];
   return (
     <svg viewBox="0 0 120 100" fill="none" className="w-full h-full">
-      {cells.map(([c, r]) => {
+      {cells.map(([c, r], i) => {
         const isH = highlighted.some(([hc, hr]) => hc === c && hr === r);
+        const isFirst = c === 0 && r === 0;
         return (
           <rect key={`${c}-${r}`} x={20+c*22} y={10+r*22} width="16" height="16" rx="1"
-            fill={c===0&&r===0 ? "rgba(184,153,104,0.15)" : "none"}
+            className={isFirst ? undefined : "motif-cell"}
+            style={isFirst ? undefined : { animationDelay: `${i * 70}ms` }}
+            fill={isFirst ? "rgba(184,153,104,0.15)" : "#B89968"}
+            fillOpacity={isFirst ? undefined : 0}
             stroke={isH ? "#B89968" : "#3A3A38"} strokeWidth="0.5" />
         );
       })}
       <rect x="20" y="82" width="72" height="7" rx="1" fill="none" stroke="#B89968" strokeWidth="0.5" />
-      <rect x="20" y="82" width="28" height="7" rx="1" fill="rgba(184,153,104,0.2)" />
+      <rect className="motif-bar" x="20" y="82" width="28" height="7" rx="1" fill="rgba(184,153,104,0.2)" />
     </svg>
   );
 }
@@ -57,9 +61,9 @@ function AboutMotif() {
   return (
     <svg viewBox="0 0 120 100" fill="none" className="w-full h-full">
       <rect x="30" y="8" width="60" height="75" rx="2" fill="none" stroke="#8FA88F" strokeWidth="0.5" />
-      <line x1="42" y1="30" x2="78" y2="30" stroke="#3A3A38" strokeWidth="0.5" />
-      <line x1="42" y1="40" x2="70" y2="40" stroke="#3A3A38" strokeWidth="0.5" />
-      <line x1="42" y1="50" x2="74" y2="50" stroke="#3A3A38" strokeWidth="0.5" />
+      <line className="motif-draw" pathLength={1} x1="42" y1="30" x2="78" y2="30" stroke="#3A3A38" strokeWidth="0.5" />
+      <line className="motif-draw" pathLength={1} style={{ animationDelay: "120ms" }} x1="42" y1="40" x2="70" y2="40" stroke="#3A3A38" strokeWidth="0.5" />
+      <line className="motif-draw" pathLength={1} style={{ animationDelay: "240ms" }} x1="42" y1="50" x2="74" y2="50" stroke="#3A3A38" strokeWidth="0.5" />
       <text x="60" y="95" textAnchor="middle" fill="#8FA88F" fontFamily="monospace" fontSize="8" letterSpacing="0.04em">portrait</text>
     </svg>
   );
@@ -84,7 +88,7 @@ function TrackCard({
       onMouseLeave={() => setHovered(false)}
     >
       <div
-        className="flex items-start gap-6 p-6 rounded-sm transition-all duration-300 cursor-pointer"
+        className={`flex items-start gap-6 p-6 rounded-sm transition-all duration-300 cursor-pointer ${hovered ? "-translate-y-0.5" : ""}`}
         style={{
           border: `0.5px solid ${hovered ? glowColor + "40" : "var(--border-subtle)"}`,
           background: "var(--surface-inset)",
@@ -93,7 +97,9 @@ function TrackCard({
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3 mb-2.5">
-            <span className="font-mono text-[11px] tracking-[0.04em] text-faint">{number}</span>
+            <span className={`font-mono text-[11px] tracking-[0.04em] transition-colors duration-200 ${hovered ? accentClass : "text-faint"}`}>
+              {number}
+            </span>
             <span className={`font-mono text-[11px] tracking-[0.1em] ${accentClass}`}>{accentLabel}</span>
           </div>
           <h2 className="text-[22px] font-medium tracking-[-0.01em] text-primary mb-2 leading-[1.15]">
@@ -104,7 +110,8 @@ function TrackCard({
             <span className="font-mono text-[11px] text-faint">{ctaCount}</span>
             <span className="font-mono text-[11px] text-faint">·</span>
             <span className={`font-mono text-[11px] ${accentClass} group-hover:underline transition-all duration-150`}>
-              {ctaText} →
+              {ctaText}{" "}
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">→</span>
             </span>
           </div>
         </div>
@@ -116,6 +123,15 @@ function TrackCard({
   );
 }
 
+/* ─── Hero copy (split for the masked reveal) ───────────────────────────── */
+const HEADLINE: Array<{ w: string; cls?: string }> = [
+  { w: "Building" }, { w: "full-stack" }, { w: "business" }, { w: "solutions" },
+  { w: "at" }, { w: "the" }, { w: "crossroads" }, { w: "of" },
+  { w: "software", cls: "text-accent-ai" }, { w: "and" }, { w: "AI.", cls: "text-accent-biz" },
+];
+
+const EYEBROW = "— full-stack engineer · dhaka, bd —";
+
 /* ─── Page ──────────────────────────────────────────────────────────────── */
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -125,10 +141,28 @@ export default function Home() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion) {
+      gsap.set("[data-hero-char]", { opacity: 1 });
+      // y: 0 clears the pixel offset GSAP reads from the translate-y class
+      gsap.set("[data-hero-word]", { yPercent: 0, y: 0 });
+      gsap.set(subRef.current, { opacity: 1 });
+      if (cardsRef.current) {
+        gsap.set(cardsRef.current.querySelectorAll("[data-reveal]"), { opacity: 1 });
+      }
+      return;
+    }
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    tl.fromTo(eyebrowRef.current, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
-      .fromTo(headlineRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9 }, "-=0.3")
-      .fromTo(subRef.current, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 }, "-=0.4");
+    tl.to("[data-hero-char]", { opacity: 1, duration: 0.45, stagger: 0.012, ease: "none" })
+      .fromTo(
+        "[data-hero-word]",
+        { yPercent: 110, y: 0 },
+        { yPercent: 0, y: 0, duration: 0.85, stagger: 0.04 },
+        "-=0.25"
+      )
+      .fromTo(subRef.current, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 }, "-=0.45");
 
     if (cardsRef.current) {
       const cards = cardsRef.current.querySelectorAll("[data-reveal]");
@@ -170,18 +204,28 @@ export default function Home() {
             <p
               ref={eyebrowRef}
               className="font-mono text-[11px] tracking-[0.08em] text-faint mb-5"
-              style={{ opacity: 0 }}
+              aria-label={EYEBROW}
             >
-              — full-stack engineer · dhaka, bd —
+              {EYEBROW.split("").map((c, i) => (
+                <span key={i} data-hero-char aria-hidden="true" className="opacity-0">
+                  {c === " " ? " " : c}
+                </span>
+              ))}
             </p>
             <h1
               ref={headlineRef}
               className="font-medium tracking-[-0.02em] text-primary leading-[1.1] mb-5 max-w-[560px]"
-              style={{ fontSize: "clamp(32px, 5vw, 52px)", opacity: 0 }}
+              style={{ fontSize: "clamp(32px, 5vw, 52px)" }}
             >
-              Building full-stack business solutions at the crossroads of{" "}
-              <span className="text-accent-ai">software</span> and{" "}
-              <span className="text-accent-biz">AI</span>.
+              {HEADLINE.map(({ w, cls }, i) => (
+                <span key={i}>
+                  <span className="inline-block overflow-hidden align-bottom pb-[0.1em] -mb-[0.1em]">
+                    <span data-hero-word className={`inline-block translate-y-[110%] ${cls ?? ""}`}>
+                      {w}
+                    </span>
+                  </span>{" "}
+                </span>
+              ))}
             </h1>
             <p
               ref={subRef}
@@ -246,7 +290,7 @@ export default function Home() {
           <TrackCard
             number="03" accentLabel="business" accentClass="text-accent-biz" glowColor="#B89968"
             title="Full-stack business systems"
-            description="Booking platforms, multi-tenant apps, headless commerce, marketing systems. Architecture-first builds for operators, not portfolios."
+            description="Booking platforms, multi-tenant apps, headless commerce, marketing systems. Architecture-first builds for operators, not for show."
             ctaCount="4 projects" ctaText="view work" href="/business"
             motif={<BizMotif />}
           />

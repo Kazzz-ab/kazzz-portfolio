@@ -6,10 +6,10 @@ import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
-  { href: "/about", label: "about" },
-  { href: "/ai-ml", label: "ai/ml" },
-  { href: "/business", label: "business" },
-  { href: "mailto:kaziabrarulh@gmail.com", label: "contact" },
+  { href: "/about", label: "about", hoverAccent: "hover:text-accent-about" },
+  { href: "/ai-ml", label: "ai/ml", hoverAccent: "hover:text-accent-ai" },
+  { href: "/business", label: "business", hoverAccent: "hover:text-accent-biz" },
+  { href: "mailto:kaziabrarulh@gmail.com", label: "contact", hoverAccent: "hover:text-accent-ai" },
 ];
 
 function accentForPath(path: string): string {
@@ -48,11 +48,17 @@ export function Nav() {
               <Link
                 key={href}
                 href={href}
-                className={`font-mono text-[11px] tracking-[0.04em] transition-colors duration-150 ${
+                className={`group relative font-mono text-[11px] tracking-[0.04em] transition-colors duration-150 py-2 -my-2 ${
                   isActive ? accent : "text-muted hover:text-default"
                 }`}
               >
-                {label}
+                {isActive && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-current"
+                  />
+                )}
+                <span className="link-underline">{label}</span>
               </Link>
             );
           })}
@@ -63,9 +69,10 @@ export function Nav() {
 
         {/* Mobile: hamburger only */}
         <button
-          className="md:hidden flex flex-col gap-1.5 p-1"
+          className="md:hidden flex flex-col justify-center gap-1.5 p-3 -m-3 min-w-[44px] min-h-[44px]"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
+          aria-expanded={open}
         >
           <span className="block h-px w-5 bg-muted transition-all duration-200"
             style={{ transform: open ? "rotate(45deg) translate(4px, 4px)" : "none" }} />
@@ -80,7 +87,10 @@ export function Nav() {
       {open && (
         <div
           className="md:hidden fixed inset-0 z-50 flex flex-col"
-          style={{ background: "var(--color-base)", backdropFilter: "blur(8px)" }}
+          style={{
+            background: "var(--color-base)",
+            animation: "fadeIn 0.25s ease both",
+          }}
         >
           <div className="flex justify-between items-center px-7 pt-7 pb-8">
             <Link href="/" onClick={() => setOpen(false)}
@@ -89,26 +99,37 @@ export function Nav() {
             </Link>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <button onClick={() => setOpen(false)} className="font-mono text-[11px] text-muted">
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close menu"
+                className="font-mono text-[11px] text-muted p-3 -m-3 min-w-[44px] min-h-[44px]"
+              >
                 ✕
               </button>
             </div>
           </div>
           <nav className="flex flex-col gap-2 px-7">
-            {navItems.map(({ href, label }) => (
+            {navItems.map(({ href, label, hoverAccent }, i) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="font-mono text-[22px] tracking-[-0.01em] text-primary py-3 hover:text-accent-ai transition-colors duration-150"
-                style={{ borderBottom: "0.5px solid var(--border-subtle)" }}
+                className={`font-mono text-[22px] tracking-[-0.01em] text-primary py-3 ${hoverAccent} transition-colors duration-150`}
+                style={{
+                  borderBottom: "0.5px solid var(--border-subtle)",
+                  animation: "drawerIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both",
+                  animationDelay: `${80 + i * 60}ms`,
+                }}
               >
                 {label}
               </Link>
             ))}
           </nav>
           <div className="mt-auto px-7 pb-8">
-            <p className="font-mono text-[10px] tracking-[0.08em] text-faint">
+            <p
+              className="font-mono text-[10px] tracking-[0.08em] text-faint"
+              style={{ animation: "drawerIn 0.45s ease both", animationDelay: "360ms" }}
+            >
               full-stack engineer · dhaka, bd
             </p>
           </div>

@@ -3,6 +3,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ProjectSlider } from "@/components/slider/ProjectSlider";
+import { Reveal } from "@/components/ui/Reveal";
 import { getCaseStudiesByTrack } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -37,17 +38,23 @@ export default function AiMlPage() {
       <Nav />
 
       {/* Track header */}
-      <div className="pb-7 mb-6" style={{ borderBottom: "0.5px solid var(--border-subtle)" }}>
-        <div className="flex items-baseline gap-3 mb-3.5">
+      <div className="relative pb-7 mb-6">
+        <Reveal className="flex items-baseline gap-3 mb-3.5">
           <span className="font-mono text-[11px] tracking-[0.04em] text-faint">01</span>
           <span className="font-mono text-[11px] tracking-[0.1em] text-accent-ai">ai implementations</span>
-        </div>
-        <h1 className="text-[30px] font-medium tracking-[-0.02em] text-primary leading-[1.15] max-w-[480px] mb-3">
+        </Reveal>
+        <Reveal as="h1" delay={60} className="text-[30px] font-medium tracking-[-0.02em] text-primary leading-[1.15] max-w-[480px] mb-3">
           Production AI, beyond the wrapper
-        </h1>
-        <p className="text-[13px] text-muted max-w-[480px] leading-[1.6]">
-          Two systems where AI does the actual work — vector retrieval over real documents, agentic loops with cited output. Built on shared retrieval infrastructure, deployed in production.
-        </p>
+        </Reveal>
+        <Reveal as="p" delay={120} className="text-[13px] text-muted max-w-[480px] leading-[1.6]">
+          Two systems where AI does the actual work — vector retrieval over real documents, agentic loops with cited output. Both grounded in primary sources, both built to show their work.
+        </Reveal>
+        <Reveal
+          variant="rule"
+          delay={150}
+          className="absolute bottom-0 left-0 w-full h-px"
+          style={{ background: "var(--border-subtle)" }}
+        />
       </div>
 
       {/* Slider */}
@@ -64,17 +71,18 @@ export default function AiMlPage() {
 
       {/* Principles */}
       <div className="pt-8" style={{ borderTop: "0.5px solid var(--border-subtle)" }}>
-        <div className="mb-7">
+        <Reveal className="mb-7">
           <span className="font-mono text-[11px] tracking-[0.1em] text-accent-ai block mb-3">approach</span>
           <h2 className="text-[28px] font-medium tracking-[-0.02em] text-primary leading-[1.2] max-w-[480px]">
             How I think about AI implementation
           </h2>
-        </div>
+        </Reveal>
 
         <div>
           {principles.map((p, i) => (
-            <div
+            <Reveal
               key={p.number}
+              delay={i * 90}
               className="grid gap-6 pb-7 mb-7"
               style={{
                 gridTemplateColumns: "60px 1fr",
@@ -88,7 +96,7 @@ export default function AiMlPage() {
                 <h3 className="text-[18px] font-medium text-primary mb-3">{p.title}</h3>
                 <p className="text-[14px] text-body leading-[1.65] max-w-[520px]">{p.body}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

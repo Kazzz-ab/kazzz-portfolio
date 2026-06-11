@@ -19,13 +19,18 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const color = trackColor[track];
 
+  // The left gutter matches PageContainer padding (20px mobile / 28px md+),
+  // so read it from the container instead of hardcoding.
+  const gutterOf = (container: HTMLElement) =>
+    parseFloat(getComputedStyle(container).paddingLeft) || 28;
+
   const scrollTo = useCallback((index: number) => {
     const container = scrollRef.current;
     if (!container) return;
     const cards = container.querySelectorAll<HTMLElement>("[data-card]");
     const card = cards[index];
     if (!card) return;
-    container.scrollTo({ left: card.offsetLeft - 28, behavior: "smooth" });
+    container.scrollTo({ left: card.offsetLeft - gutterOf(container), behavior: "smooth" });
     setActiveIndex(index);
   }, []);
 
@@ -34,11 +39,12 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
     const container = scrollRef.current;
     if (!container) return;
     const onScroll = () => {
+      const gutter = gutterOf(container);
       const cards = container.querySelectorAll<HTMLElement>("[data-card]");
       let closest = 0;
       let minDist = Infinity;
       cards.forEach((card, i) => {
-        const dist = Math.abs(card.offsetLeft - container.scrollLeft - 28);
+        const dist = Math.abs(card.offsetLeft - container.scrollLeft - gutter);
         if (dist < minDist) { minDist = dist; closest = i; }
       });
       setActiveIndex(closest);
@@ -54,13 +60,11 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
 
   return (
     <div>
-      {/* Slider */}
+      {/* Slider — bleeds to the container edge (20px mobile / 28px md+) */}
       <div
         ref={scrollRef}
-        className="flex gap-3.5 overflow-x-auto pb-3 outline-none"
+        className="slider-mask flex gap-3.5 overflow-x-auto outline-none -mx-5 md:-mx-7 pl-5 md:pl-7 pb-3 cursor-grab active:cursor-grabbing"
         style={{
-          margin: "0 -28px",
-          padding: "0 0 12px 28px",
           scrollSnapType: "x mandatory",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -76,7 +80,7 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
             <ProjectCard project={project} track={track} trackOrder={i + 1} />
           </div>
         ))}
-        <div className="flex-none w-7 shrink-0" aria-hidden />
+        <div className="flex-none w-5 md:w-7 shrink-0" aria-hidden />
       </div>
 
       {/* Controls */}
@@ -86,19 +90,24 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
           <span className="font-mono text-[11px] text-faint">
             {String(activeIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center">
             {projects.map((_, i) => (
               <button
                 key={i}
                 onClick={() => scrollTo(i)}
-                className="rounded-full transition-all duration-250"
-                style={{
-                  width: i === activeIndex ? "24px" : "6px",
-                  height: "6px",
-                  background: i === activeIndex ? color : "rgba(255,255,255,0.12)",
-                }}
+                className="flex items-center px-[3px] py-2.5"
                 aria-label={`Project ${i + 1}`}
-              />
+                aria-current={i === activeIndex ? "true" : undefined}
+              >
+                <span
+                  className="rounded-full transition-all duration-250"
+                  style={{
+                    width: i === activeIndex ? "24px" : "6px",
+                    height: "6px",
+                    background: i === activeIndex ? color : "var(--color-ghost)",
+                  }}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -109,19 +118,19 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
             onClick={() => scrollTo(Math.max(activeIndex - 1, 0))}
             disabled={activeIndex === 0}
             aria-label="Previous project"
-            className="font-mono text-[13px] w-8 h-8 flex items-center justify-center rounded-sm transition-all duration-150 disabled:opacity-25"
+            className="group font-mono text-[13px] w-9 h-9 flex items-center justify-center rounded-sm transition-all duration-150 disabled:opacity-25"
             style={{ border: "0.5px solid var(--border-subtle)" }}
           >
-            ←
+            <span className="transition-transform duration-200 group-hover:-translate-x-0.5">←</span>
           </button>
           <button
             onClick={() => scrollTo(Math.min(activeIndex + 1, projects.length - 1))}
             disabled={activeIndex === projects.length - 1}
             aria-label="Next project"
-            className="font-mono text-[13px] w-8 h-8 flex items-center justify-center rounded-sm transition-all duration-150 disabled:opacity-25"
+            className="group font-mono text-[13px] w-9 h-9 flex items-center justify-center rounded-sm transition-all duration-150 disabled:opacity-25"
             style={{ border: `0.5px solid ${color}55`, color }}
           >
-            →
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
           </button>
         </div>
       </div>

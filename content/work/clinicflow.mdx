@@ -2,7 +2,7 @@
 title: ClinicFlow
 slug: clinicflow
 summary: Booking and practice management for small clinics — patient records, doctor scheduling, invoicing, and analytics on a single Express + Prisma backend.
-problem_oneliner: Small clinics need booking software that isn't enterprise SaaS pricing for enterprise SaaS features.
+problem_oneliner: Small clinics need practice management without enterprise-SaaS pricing for what is, at heart, a calendar and a patient list.
 order: 1
 featured: true
 status: shipped
@@ -14,6 +14,7 @@ client_type: Portfolio
 primary_stack: [Express, TypeScript, Prisma, PostgreSQL, React, Tailwind]
 ai_layer: null
 deployment: Vercel
+repo_url: https://github.com/Kazzz-ab/clinicflow
 tags: [multi-tenant, booking, crm, architecture]
 related_work: [counselflow]
 related_writing: []
@@ -57,7 +58,7 @@ The frontend is a React + Vite SPA with React Router and Tailwind CSS. Pages map
   title="Shared backend pattern, separate frontend codebases"
   chose="Same Express/Prisma/PostgreSQL architecture for both ClinicFlow and CounselFlow, separate React frontends"
   rejected="One monorepo with shared components, one codebase with domain flags"
-  why="The business rules diverge enough that a shared codebase with domain flags (if clinic... else law_firm...) would become unreadable fast. Separate frontends mean each product can evolve its UI independently. The shared pattern is architectural — same route structure, same auth model, same Prisma patterns — not a shared runtime. This is the senior signal: knowing when to share code vs. when to share a pattern."
+  why="The business rules diverge enough that a shared codebase with domain flags (if clinic... else law_firm...) would become unreadable fast. Separate frontends mean each product can evolve its UI independently. The shared pattern is architectural — same route structure, same auth model, same Prisma patterns — not a shared runtime. The dividing line: share the pattern when business rules diverge, share the code only when they don't."
 />
 
 </Decisions>
@@ -74,7 +75,9 @@ export const requireRole = (...roles) => (req, res, next) => {
 
 // backend/src/routes/admin.js
 router.get("/users", authenticate, requireRole("admin"), async (req, res) => {
-  const users = await prisma.user.findMany({ select: { id, name, email, role } });
+  const users = await prisma.user.findMany({
+    select: { id: true, name: true, email: true, role: true },
+  });
   res.json(users);
 });
 

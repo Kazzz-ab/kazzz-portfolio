@@ -7,11 +7,11 @@ export function Footer() {
       <span>© 2026 Kazi Abrarul Haque</span>
       <div className="flex items-center gap-[18px]">
         <a href="https://github.com/Kazzz-ab" target="_blank" rel="noopener noreferrer"
-          className="hover:text-muted transition-colors duration-150">github</a>
+          className="group hover:text-muted transition-colors duration-150 inline-block py-2 -my-2"><span className="link-underline">github</span></a>
         <a href="https://www.linkedin.com/in/kazi-abrarul-haque05/" target="_blank" rel="noopener noreferrer"
-          className="hover:text-muted transition-colors duration-150">linkedin</a>
+          className="group hover:text-muted transition-colors duration-150 inline-block py-2 -my-2"><span className="link-underline">linkedin</span></a>
         <a href="mailto:kaziabrarulh@gmail.com"
-          className="hover:text-muted transition-colors duration-150">email</a>
+          className="group hover:text-muted transition-colors duration-150 inline-block py-2 -my-2"><span className="link-underline">email</span></a>
       </div>
     </footer>
   );

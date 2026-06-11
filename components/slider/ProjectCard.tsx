@@ -41,7 +41,9 @@ function ProjectThumbnail({ project, track }: { project: CaseStudy; track: "ai-m
           src={project.architecture_diagram}
           alt={`${project.title} architecture`}
           loading="lazy"
-          className="w-full h-full object-contain opacity-30 scale-110"
+          width={600}
+          height={300}
+          className="w-full h-full object-contain opacity-30 scale-110 transition-all duration-500 group-hover:opacity-50 group-hover:scale-105"
         />
       ) : (
         /* Abstract grid pattern */
@@ -83,7 +85,7 @@ export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
 
   return (
     <div
-      className="flex-none w-[360px] sm:w-[400px] p-5 rounded-sm flex flex-col transition-all duration-300"
+      className="group flex-none w-[min(360px,calc(100vw-56px))] sm:w-[400px] p-5 rounded-sm flex flex-col transition-all duration-300"
       style={{
         background: "var(--color-card, #13131A)",
         border: `0.5px solid ${hovered ? glow + "44" : "var(--border-card)"}`,
@@ -106,7 +108,7 @@ export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
 
       {/* Title */}
       <h3 className="text-[24px] font-medium tracking-[-0.01em] text-primary leading-[1.15] mb-1.5">
-        {project.title}
+        <span className="link-underline">{project.title}</span>
       </h3>
       <p className="text-[13px] text-body leading-[1.5] mb-3">{project.summary}</p>
 
@@ -137,35 +139,35 @@ export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
       >
         <Link
           href={`/work/${project.slug}`}
-          className={`font-mono text-[11px] ${accent} hover:underline transition-all duration-150`}
+          className={`font-mono text-[11px] ${accent} hover:underline transition-all duration-150 inline-block py-2 -my-2`}
         >
           case study →
         </Link>
         <div className="flex items-center gap-3">
           {project.repo_url && (
             <a href={project.repo_url} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
+              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150 inline-block py-2 -my-2">
               github
             </a>
           )}
           {project.demo_url && (
             <a href={project.demo_url} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[10px] text-faint hover:text-default transition-colors duration-150">
+              className="font-mono text-[10px] text-faint hover:text-default transition-colors duration-150 inline-block py-2 -my-2">
               live demo
             </a>
           )}
           {project.loom_url && (
             <a href={project.loom_url} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
+              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150 inline-block py-2 -my-2">
               loom
             </a>
           )}
-          {!project.demo_url && !project.loom_url && (
-            <a href="mailto:kaziabrarulh@gmail.com?subject=Demo request"
-              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150">
-              ask for demo
-            </a>
-          )}
+          <a
+            href={`mailto:kaziabrarulh@gmail.com?subject=${encodeURIComponent(`Demo request — ${project.title}`)}`}
+            className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150 inline-block py-2 -my-2"
+          >
+            ask for demo
+          </a>
         </div>
       </div>
     </div>

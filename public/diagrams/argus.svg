@@ -1,0 +1,107 @@
+<svg viewBox="0 0 640 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="argus-title argus-desc">
+  <title id="argus-title">Argus Architecture</title>
+  <desc id="argus-desc">Agent loop calling grounded tools, streaming activity over SSE, with the same tools exposed via MCP</desc>
+
+  <!-- Row labels -->
+  <text x="12" y="64" font-family="monospace" font-size="9" fill="#5A5A55" letter-spacing="0.04em">AGENT</text>
+  <text x="12" y="174" font-family="monospace" font-size="9" fill="#5A5A55" letter-spacing="0.04em">STREAM</text>
+  <text x="12" y="256" font-family="monospace" font-size="9" fill="#5A5A55" letter-spacing="0.04em">MCP</text>
+
+  <!-- Tools caption -->
+  <text x="420" y="14" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55" letter-spacing="0.04em">SEC EDGAR + NEWS RSS · NO DATA KEYS</text>
+
+  <!-- ── AGENT ROW ── -->
+
+  <!-- Company input -->
+  <rect x="24" y="40" width="76" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="62" y="57" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">company</text>
+  <text x="62" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">name</text>
+
+  <!-- Arrow -->
+  <line x1="101" y1="60" x2="124" y2="60" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="124,57 129,60 124,63" fill="#3A3A38"/>
+
+  <!-- Claude agent loop -->
+  <rect x="130" y="34" width="100" height="52" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="180" y="51" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">Claude</text>
+  <text x="180" y="64" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">agent loop</text>
+  <text x="180" y="77" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">&#8804;10 steps &#183; 60s</text>
+
+  <!-- Fan arrows to tools -->
+  <line x1="231" y1="48" x2="352" y2="41" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="351,38 357,41 351,44" fill="#3A3A38"/>
+  <line x1="231" y1="60" x2="352" y2="83" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="351,80 357,83 351,86" fill="#3A3A38"/>
+  <line x1="231" y1="72" x2="352" y2="125" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="351,122 357,125 351,128" fill="#3A3A38"/>
+  <line x1="231" y1="82" x2="352" y2="173" stroke="#6B8EAE" stroke-width="0.5"/>
+  <polygon points="350,170 357,173 351,177" fill="#6B8EAE"/>
+
+  <!-- Tools stack -->
+  <rect x="358" y="24" width="124" height="34" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="420" y="38" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">search_filings</text>
+  <text x="420" y="51" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">EDGAR full-text</text>
+
+  <rect x="358" y="66" width="124" height="34" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="420" y="80" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">get_financials</text>
+  <text x="420" y="93" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">EDGAR XBRL</text>
+
+  <rect x="358" y="108" width="124" height="34" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="420" y="122" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">web_search</text>
+  <text x="420" y="135" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">news RSS</text>
+
+  <!-- compose_brief (terminal tool) -->
+  <rect x="358" y="156" width="124" height="34" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="420" y="170" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">compose_brief</text>
+  <text x="420" y="183" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">terminal tool</text>
+
+  <!-- Arrow to brief -->
+  <line x1="483" y1="173" x2="518" y2="173" stroke="#6B8EAE" stroke-width="0.5"/>
+  <polygon points="518,170 523,173 518,176" fill="#6B8EAE"/>
+
+  <!-- Research brief -->
+  <rect x="524" y="156" width="92" height="34" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="570" y="170" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">cited</text>
+  <text x="570" y="183" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">brief</text>
+
+  <!-- ── STREAM ROW ── -->
+
+  <!-- Claude → SSE -->
+  <line x1="180" y1="87" x2="180" y2="146" stroke="#6B8EAE" stroke-width="0.5"/>
+  <polygon points="177,144 180,150 183,144" fill="#6B8EAE"/>
+
+  <!-- SSE stream -->
+  <rect x="130" y="152" width="100" height="40" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="180" y="169" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">SSE</text>
+  <text x="180" y="182" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">event stream</text>
+
+  <!-- Arrow to feed -->
+  <line x1="129" y1="172" x2="106" y2="172" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="106,169 101,172 106,175" fill="#3A3A38"/>
+
+  <!-- Live feed -->
+  <rect x="24" y="152" width="76" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="62" y="169" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">live</text>
+  <text x="62" y="182" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">feed</text>
+
+  <!-- ── MCP ROW ── -->
+
+  <!-- Tools → MCP server (same implementations) -->
+  <polyline points="420,191 420,252 237,252" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="3 2" fill="none"/>
+  <polygon points="239,249 233,252 239,255" fill="#3A3A38"/>
+  <text x="330" y="246" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">same four tools &#183; stdio</text>
+
+  <!-- MCP server -->
+  <rect x="130" y="232" width="100" height="40" rx="2" stroke="#6B8EAE" stroke-width="0.5"/>
+  <text x="180" y="249" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">MCP</text>
+  <text x="180" y="262" text-anchor="middle" font-family="monospace" font-size="9" fill="#6B8EAE">server</text>
+
+  <!-- Arrow to clients -->
+  <line x1="129" y1="252" x2="106" y2="252" stroke="#3A3A38" stroke-width="0.5"/>
+  <polygon points="106,249 101,252 106,255" fill="#3A3A38"/>
+
+  <!-- MCP clients -->
+  <rect x="24" y="232" width="76" height="40" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="62" y="249" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">claude</text>
+  <text x="62" y="262" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">code</text>
+</svg>

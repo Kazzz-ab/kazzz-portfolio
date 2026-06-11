@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { Reveal } from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
   title: "About",
@@ -66,23 +67,29 @@ export default function AboutPage() {
       <Nav />
 
       {/* Header */}
-      <div className="pb-7 mb-8" style={{ borderBottom: "0.5px solid var(--border-subtle)" }}>
-        <div className="flex items-baseline gap-3 mb-3.5">
+      <div className="relative pb-7 mb-8">
+        <Reveal className="flex items-baseline gap-3 mb-3.5">
           <span className="font-mono text-[11px] tracking-[0.04em] text-faint">03</span>
           <span className="font-mono text-[11px] tracking-[0.1em] text-accent-about">about</span>
-        </div>
-        <h1 className="text-[30px] md:text-[36px] font-medium tracking-[-0.02em] text-primary leading-[1.1] mb-3">
+        </Reveal>
+        <Reveal as="h1" delay={60} className="text-[30px] md:text-[36px] font-medium tracking-[-0.02em] text-primary leading-[1.1] mb-3">
           Kazi Abrarul Haque
-        </h1>
-        <p className="text-[15px] text-body max-w-[480px] leading-[1.55]">
+        </Reveal>
+        <Reveal as="p" delay={120} className="text-[15px] text-body max-w-[480px] leading-[1.55]">
           Full-stack engineer from Dhaka. Building production systems at the crossroads of software and AI.
-        </p>
+        </Reveal>
+        <Reveal
+          variant="rule"
+          delay={150}
+          className="absolute bottom-0 left-0 w-full h-px"
+          style={{ background: "var(--border-subtle)" }}
+        />
       </div>
 
       <div className="max-w-[620px] space-y-12">
 
         {/* Bio */}
-        <section>
+        <Reveal as="section">
           <p className="text-[15px] text-body leading-[1.8] mb-4">
             I&apos;m in my final year of Computer Science and Engineering at North South University in Dhaka.
             I started building production systems before the coursework caught up — and kept going from there.
@@ -92,19 +99,20 @@ export default function AboutPage() {
             I build things that have to work for real operators in real conditions — not demos, not prototypes
             dressed as products. The six projects in this portfolio are all live or in active development.
           </p>
-        </section>
+        </Reveal>
 
         {/* Expertise / Stack */}
         <section>
-          <div className="flex items-baseline gap-3 mb-6">
+          <Reveal className="flex items-baseline gap-3 mb-6">
             <span className="font-mono text-[11px] tracking-[0.1em] text-accent-about">expertise</span>
-          </div>
+          </Reveal>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {stack.map(({ category, items }) => (
-              <div
+            {stack.map(({ category, items }, i) => (
+              <Reveal
                 key={category}
-                className="p-4 rounded-sm"
-                style={{ background: "var(--surface-inset)", border: "0.5px solid var(--border-subtle)" }}
+                delay={(i % 2) * 80}
+                className="p-4 rounded-sm transition-all duration-300 hover:-translate-y-0.5 border-[0.5px] border-[color:var(--border-subtle)] hover:border-[#8FA88F55]"
+                style={{ background: "var(--surface-inset)" }}
               >
                 <p className="font-mono text-[10px] tracking-[0.1em] text-accent-about mb-3 uppercase">
                   {category}
@@ -117,7 +125,7 @@ export default function AboutPage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -140,20 +148,21 @@ export default function AboutPage() {
               title: "Honest about the gaps",
               body: "Every project here has a \"doesn't yet\" list. Knowing what's missing and why is more useful than pretending everything is finished.",
             },
-          ].map(({ title, body }) => (
-            <div
+          ].map(({ title, body }, i) => (
+            <Reveal
               key={title}
+              delay={i * 80}
               className="pb-5 mb-5"
               style={{ borderBottom: "0.5px solid var(--border-subtle)" }}
             >
               <h3 className="text-[15px] font-medium text-primary mb-1.5">{title}</h3>
               <p className="text-[14px] text-body leading-[1.65]">{body}</p>
-            </div>
+            </Reveal>
           ))}
         </section>
 
         {/* Currently */}
-        <section>
+        <Reveal as="section">
           <div className="flex items-baseline gap-3 mb-4">
             <span className="font-mono text-[11px] tracking-[0.1em] text-accent-about">currently</span>
           </div>
@@ -174,10 +183,10 @@ export default function AboutPage() {
               retrieval design, structured output contracts, multi-tenant systems with real isolation requirements.
             </p>
           </div>
-        </section>
+        </Reveal>
 
         {/* Contact */}
-        <section style={{ borderTop: "0.5px solid var(--border-subtle)", paddingTop: "28px" }}>
+        <Reveal as="section" style={{ borderTop: "0.5px solid var(--border-subtle)", paddingTop: "28px" }}>
           <div className="flex items-baseline gap-3 mb-4">
             <span className="font-mono text-[11px] tracking-[0.1em] text-accent-about">contact</span>
           </div>
@@ -187,12 +196,12 @@ export default function AboutPage() {
           </p>
           <a
             href="mailto:kaziabrarulh@gmail.com"
-            className="inline-flex items-center gap-2 font-mono text-[12px] text-accent-about px-4 py-2.5 rounded-sm transition-all duration-200 hover:bg-accent-about/10"
-            style={{ border: "0.5px solid #8FA88F55" }}
+            className="group inline-flex items-center gap-2 font-mono text-[12px] text-accent-about px-4 py-2.5 rounded-sm transition-all duration-200 hover:bg-accent-about/10 border-[0.5px] border-[#8FA88F55] hover:border-[#8FA88F88]"
           >
-            kaziabrarulh@gmail.com →
+            kaziabrarulh@gmail.com{" "}
+            <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">→</span>
           </a>
-        </section>
+        </Reveal>
 
       </div>
 

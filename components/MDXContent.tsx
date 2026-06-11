@@ -8,14 +8,28 @@ import { Decision } from "./case-study/Decision";
 import { Code } from "./case-study/Code";
 import { Outcomes, Works, DoesntYet } from "./case-study/Outcomes";
 import { Lessons } from "./case-study/Lessons";
+import { Reveal } from "./ui/Reveal";
+
+/* Top-level sections fade up as they scroll into view; nested pieces
+   (Decision, Works, DoesntYet) render inside their parent's reveal. */
+function withReveal<P extends object>(Component: React.ComponentType<P>) {
+  function Revealed(props: P) {
+    return (
+      <Reveal>
+        <Component {...props} />
+      </Reveal>
+    );
+  }
+  return Revealed;
+}
 
 const mdxComponents = {
-  Problem,
-  Architecture,
-  Decisions,
+  Problem: withReveal(Problem),
+  Architecture: withReveal(Architecture),
+  Decisions: withReveal(Decisions),
   Decision,
-  Code,
-  Outcomes,
+  Code: withReveal(Code),
+  Outcomes: withReveal(Outcomes),
   Works,
   DoesntYet,
   Lessons,
@@ -33,7 +47,9 @@ export function MDXContent({ code, track = "ai-ml" }: MDXContentProps) {
       <Decision {...props} accent={track === "ai-ml" ? "ai" : "biz"} />
     ),
     Lessons: (props: React.ComponentProps<typeof Lessons>) => (
-      <Lessons {...props} accent={track === "ai-ml" ? "ai" : "biz"} />
+      <Reveal>
+        <Lessons {...props} accent={track === "ai-ml" ? "ai" : "biz"} />
+      </Reveal>
     ),
   };
 
