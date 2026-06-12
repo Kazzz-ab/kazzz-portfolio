@@ -1,7 +1,7 @@
 ---
-title: ClinicFlow
-slug: clinicflow
-summary: Booking and practice management for small clinics — patient records, doctor scheduling, invoicing, and analytics on a single Express + Prisma backend.
+title: Clinio
+slug: clinio
+summary: Practice management for small clinics — patient records, doctor scheduling, invoicing, and analytics on a single Express + Prisma backend with role-scoped workflows.
 problem_oneliner: Small clinics need practice management without enterprise-SaaS pricing for what is, at heart, a calendar and a patient list.
 order: 1
 featured: true
@@ -11,12 +11,12 @@ role: Solo full-stack
 timeline: 4 weeks
 domain: Healthcare
 client_type: Portfolio
-primary_stack: [Express, TypeScript, Prisma, PostgreSQL, React, Tailwind]
+primary_stack: [Express, Prisma, PostgreSQL, React, Vite, Tailwind]
 ai_layer: null
 deployment: Vercel
-repo_url: https://github.com/Kazzz-ab/clinicflow
-tags: [multi-tenant, booking, crm, architecture]
-related_work: [counselflow]
+repo_url: https://github.com/Kazzz-ab/clinio
+tags: [booking, scheduling, clinic-ops, role-based-access]
+related_work: []
 related_writing: []
 embedding_ready: true
 embedding_priority: normal
@@ -26,16 +26,16 @@ accent_color: "#B89968"
 <Problem>
 Small clinics run on spreadsheets, WhatsApp, and paper appointment books. Commercial practice management software exists but it's priced for hospital systems — monthly SaaS fees that a 3-doctor clinic can't justify for a booking calendar and a patient list. The gap is a system that covers the actual workflow: receptionist books an appointment, doctor sees the patient queue for the day, admin generates an invoice, owner looks at the weekly stats. Nothing more, nothing less.
 
-The secondary constraint was architectural: the same backend design had to serve a law firm product (CounselFlow) with different domain vocabulary and different business rules but identical infrastructure. That pairing shaped every design decision from the data model outward.
+The design constraint that shaped everything: each of those four jobs is a different person with different permissions looking at the same data. Clinio is one application that shows each role exactly its slice — not four portals, not one God-mode screen.
 </Problem>
 
-<Architecture diagram="/diagrams/clinicflow-platform.svg">
-The backend is a single Express + Prisma application with PostgreSQL as the data store. Prisma handles the schema, migrations, and typed queries — the data model covers Users (with roles), Patients, Doctors, Appointments, Invoices, and the relations between them. JWT handles auth with role-based middleware protecting routes by role: receptionist, doctor, admin.
+<Architecture diagram="/diagrams/clinio.svg">
+The backend is a single Express + Prisma application with PostgreSQL as the data store. Prisma handles the schema, migrations, and typed queries — the data model covers Users (with roles), Patients, Doctors, Appointments, Invoices, and the relations between them. JWT handles auth, and the middleware chain is deliberately explicit: helmet, CORS, rate limiting, audit capture, then role-guarded routes for receptionist, doctor, and admin.
 
-The frontend is a React + Vite SPA with React Router and Tailwind CSS. Pages map directly to the clinic workflow: patient intake form, appointment calendar, doctor availability settings, invoice generation, and an analytics dashboard. The CounselFlow frontend follows the exact same structure — Patients become Clients, Doctors become Attorneys, Appointments become Cases — with domain-appropriate copy and a different visual identity.
+The frontend is a React + Vite SPA with React Router and Tailwind CSS. Pages map directly to the clinic workflow: patient intake form, appointment calendar against real doctor availability (working hours, available days), invoice generation with PDF export, and an analytics dashboard. An emerald-and-teal identity, brand tokens centralized in a single theme file.
 </Architecture>
 
-<Decisions subtitle="Three decisions that made the paired-platform architecture work.">
+<Decisions subtitle="Three decisions that kept a four-role system simple.">
 
 <Decision
   number="01"
@@ -50,15 +50,15 @@ The frontend is a React + Vite SPA with React Router and Tailwind CSS. Pages map
   title="Express over NestJS"
   chose="Express with manual middleware composition"
   rejected="NestJS, Fastify, Hono"
-  why="NestJS's decorator-based structure adds significant boilerplate for a project where the route surface is known and bounded. Express lets you see the full middleware chain at a glance — auth, rate limit, audit log, error handler — without IoC container concepts getting in the way. For a project that needs to be forked into CounselFlow with different business logic, explicitness over magic is the right tradeoff."
+  why="NestJS's decorator-based structure adds significant boilerplate for a project where the route surface is known and bounded. Express lets you see the full middleware chain at a glance — auth, rate limit, audit log, error handler — without IoC container concepts getting in the way. In a system where three roles have different write permissions on the same tables, being able to read the entire authorization path in one file is worth more than framework structure."
 />
 
 <Decision
   number="03"
-  title="Shared backend pattern, separate frontend codebases"
-  chose="Same Express/Prisma/PostgreSQL architecture for both ClinicFlow and CounselFlow, separate React frontends"
-  rejected="One monorepo with shared components, one codebase with domain flags"
-  why="The business rules diverge enough that a shared codebase with domain flags (if clinic... else law_firm...) would become unreadable fast. Separate frontends mean each product can evolve its UI independently. The shared pattern is architectural — same route structure, same auth model, same Prisma patterns — not a shared runtime. The dividing line: share the pattern when business rules diverge, share the code only when they don't."
+  title="One SPA with role-scoped views over separate portals"
+  chose="A single React app where routes and data are gated by role"
+  rejected="Separate receptionist/doctor/admin frontends, server-rendered per-role dashboards"
+  why="The three roles differ in what data they may touch, not in what kind of interface they need — everyone gets lists, forms, and a calendar. Splitting by role would triple the surface to build and deploy for zero user benefit. Role scoping lives in two places that must agree: route guards in the SPA decide what renders, and requireRole middleware on the API decides what executes. The API is the source of truth; the UI is just a polite filter."
 />
 
 </Decisions>
@@ -89,7 +89,7 @@ router.get("/users", authenticate, requireRole("admin"), async (req, res) => {
 <Works>
 - Patient intake with full medical history, allergies, insurance fields
 - Appointment booking with doctor availability grid (working hours, available days)
-- Invoice generation linked to appointments with line items
+- Invoice generation linked to appointments, with branded PDF export
 - Role-based access: receptionist, doctor, admin each see their workflow
 - Analytics dashboard: daily appointment counts, revenue by period, patient stats
 - Audit logging on all mutations (who changed what and when)
@@ -106,7 +106,7 @@ router.get("/users", authenticate, requireRole("admin"), async (req, res) => {
 <Lessons>
 Prisma's migration workflow is the best part of the stack. Schema changes are tracked as versioned migration files, and the generated types update automatically. The discipline of "change the schema first, then the code" produces a cleaner API layer than writing the API and inferring the schema from it.
 
-The audit log should have been designed as a first-class data structure from day one. I added it midway as a middleware side-effect that writes to a JSON log. A proper `AuditLog` model in Prisma would make it queryable — "show me all changes to patient ID X in the last 30 days" — rather than requiring log parsing.
+The audit log should have been designed as a first-class data structure from day one. I added it midway as a middleware side-effect, and a proper `AuditLog` model in Prisma is what makes it queryable — "show me all changes to patient ID X in the last 30 days" — rather than something you grep.
 
-The shared-pattern approach between ClinicFlow and CounselFlow worked exactly as intended. Building CounselFlow took roughly 40% of the time ClinicFlow took because the architecture decisions were already made. The frontend vocabulary swap (Patient → Client, Doctor → Attorney) was a find-and-replace plus domain-specific business logic. That's the payoff of solving architecture before solving features.
+The booking grid earned its iteration time. The first version was a naive day calendar; the version that survived checks the doctor's working hours and available days before offering a slot. That one change moved the product from "digital appointment book" to "thing the receptionist trusts" — most of the perceived quality of Clinio lives in that grid.
 </Lessons>

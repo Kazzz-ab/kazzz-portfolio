@@ -9,7 +9,7 @@ import { getCaseStudiesByTrack } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Business",
   description:
-    "Multi-tenant SaaS, headless commerce, and AI-integrated marketing systems. Architecture-first builds.",
+    "Practice-management SaaS, headless commerce, and AI-integrated marketing systems. Architecture-first builds.",
 };
 
 const principles = [
@@ -48,7 +48,7 @@ export default function BusinessPage() {
           Production systems for real operators
         </Reveal>
         <Reveal as="p" delay={120} className="text-[13px] text-muted max-w-[480px] leading-[1.6]">
-          Multi-tenant SaaS for healthcare and legal practices, headless commerce, and AI-integrated marketing systems. Architecture-first builds for operators, not for show.
+          Practice-management SaaS for healthcare and legal operators, headless commerce, and AI-integrated marketing systems. Architecture-first builds for operators, not for show.
         </Reveal>
         <Reveal
           variant="rule"
@@ -58,7 +58,7 @@ export default function BusinessPage() {
         />
       </div>
 
-      {/* Slider — shows ClinicFlow, CounselFlow, HaqueMart, Meridian */}
+      {/* Slider — shows Clinio, Lexa, HaqueMart, Meridian */}
       {projects.length > 0 ? (
         <div className="mb-8">
           <ProjectSlider projects={projects} track="business" />

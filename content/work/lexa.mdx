@@ -1,0 +1,119 @@
+---
+title: Lexa
+slug: lexa
+summary: Matter management for small law firms — client intake, case lifecycle tracking, attorney scheduling, and billing that matches how legal work is actually engaged.
+problem_oneliner: Small firms run matters out of inboxes and spreadsheets — court dates sneak up and billable hours leak.
+order: 2
+featured: false
+status: shipped
+track: business
+role: Solo full-stack
+timeline: 2 weeks
+domain: Legal practices
+client_type: Portfolio
+primary_stack: [React, Express, Prisma, PostgreSQL, Tailwind, Framer Motion]
+ai_layer: null
+deployment: Vercel
+repo_url: https://github.com/Kazzz-ab/lexa
+tags: [matter-lifecycle, legal-billing, audit-trail, workflow]
+related_work: []
+related_writing: []
+embedding_ready: true
+embedding_priority: normal
+accent_color: "#B89968"
+---
+
+<Problem>
+A small law firm's operational reality: matters live for months, change status many times, accumulate attorney hours, and end in an invoice that has to match an engagement letter. Most small firms track all of that in Outlook, Excel, and someone's memory. The failure modes are predictable — a court date that surfaces too late, hours that never make it onto an invoice, a matter nobody can find because it's "the one from March."
+
+Lexa is built around the matter as the unit of work. Everything else in the system — clients, attorneys, paralegals, invoices, notifications — exists in relation to a numbered case record with an explicit lifecycle.
+</Problem>
+
+<Architecture diagram="/diagrams/lexa.svg">
+The core of Lexa is a case-centric domain model on PostgreSQL, managed by Prisma and served by an Express API. Every matter gets a server-generated number (`LX-YYYY-NNNN`) at creation and carries a status with enforced transitions — open through closed — plus a priority flag and an optional court date that feeds the notification system. Clients and attorneys hang off the case; invoices reference it and capture the billing model the engagement was signed under.
+
+The frontend is a React SPA with an ink-violet identity — Fraunces headings, Inter body — where the workflow surfaces are Clients, Cases, Attorneys, and Billing, with role-gated admin views for user management and the audit trail. Analytics lean on the lifecycle: active caseload, intake trends by practice area, and time-to-close come straight from status history.
+</Architecture>
+
+<Decisions subtitle="Three decisions that make the system legal-shaped.">
+
+<Decision
+  number="01"
+  title="An explicit case lifecycle with enforced transitions"
+  chose="Status enum with a server-side transition map: open → active → pending → closed (+ on-hold)"
+  rejected="Free-form status strings, appointment-style scheduled/completed flags"
+  why="A matter's state is operational truth — it drives the caseload board, the analytics, and what a paralegal is allowed to do next. Free-form strings rot into 'Active', 'ACTIVE', and 'active (waiting)'. A transition map enforced at the API turns illegal state changes into 400s instead of bad data, and it gives analytics a reliable event stream: time-to-close and active caseload are queries, not archaeology."
+/>
+
+<Decision
+  number="02"
+  title="Billing models as schema, not convention"
+  chose="A billingType field with line items that capture hourly rate × hours worked plus fixed disbursements"
+  rejected="A single fixed-fee invoice shape with hours stuffed into description text"
+  why="Legal billing is time-based more often than not, but not always — firms also engage flat-fee and retainer work. If the invoice schema only understands fixed amounts, hourly work gets encoded in free-text descriptions and can never be audited or summed. Making the billing model a field with structured line items keeps every invoice honest about the engagement behind it."
+/>
+
+<Decision
+  number="03"
+  title="Server-generated matter numbers"
+  chose="Sequential per-year numbering (LX-YYYY-NNNN) assigned by the API on creation"
+  rejected="User-entered reference fields, exposing database UUIDs"
+  why="Firms refer to matters by number in filings, emails, and phone calls — the number is an interface, not an implementation detail. Letting users invent references produces collisions and gaps; UUIDs are unreadable over the phone. The API derives the next number from a count scoped to the current year, so numbering stays chronological, gapless enough to trust, and impossible to fat-finger."
+/>
+
+</Decisions>
+
+<Code title="Case status transitions enforced server-side">
+{`// backend/src/routes/cases.js
+
+// Matter lifecycle — illegal status jumps are rejected, not stored
+const VALID_TRANSITIONS = {
+  open: ['active', 'on-hold'],
+  active: ['pending', 'on-hold'],
+  pending: ['closed', 'active'],
+  'on-hold': ['active', 'open'],
+  closed: [], // terminal state
+};
+
+router.put('/:id', async (req, res, next) => {
+  const existing = await prisma.case.findUnique({ where: { id: req.params.id } });
+  if (!existing) return res.status(404).json({ message: 'Case not found' });
+
+  const { status } = req.body;
+  if (status && status !== existing.status) {
+    const allowed = VALID_TRANSITIONS[existing.status] ?? [];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({
+        message: \`Cannot transition from \${existing.status} to \${status}\`,
+      });
+    }
+  }
+  // ...closing a matter also stamps closedAt before the update is persisted
+});`}
+</Code>
+
+<Outcomes>
+<Works>
+- Client intake with matter type, conflict-of-interest notes, referral source
+- Case tracking with auto-numbering and a status lifecycle with enforced transitions
+- Attorney scheduling against availability, with court dates feeding notifications
+- Hourly and fixed-fee invoicing with structured line items and PDF export
+- Active caseload, intake trends, and time-to-close analytics
+- Role-based access: paralegal, attorney, admin
+- Full audit trail of every write — actor, action, origin
+</Works>
+<DoesntYet>
+- Time tracking integration — hours are entered manually on invoice line items
+- Document management — matter documents are referenced by name, not stored
+- Client portal — clients cannot log in to view their case status
+- Court date calendar sync
+</DoesntYet>
+</Outcomes>
+
+<Lessons>
+The transition map is enforced server-side only, and that's half a feature. The frontend still offers every status in the dropdown and relays the API's rejection after the fact. The right UX disables invalid transitions before the call is made — which means the transitions map belongs in a shared types package consumed by both ends, not copy-pasted into the client.
+
+Modeling the domain vocabulary early paid for itself. The moment the work unit was named a "matter" with a lifecycle — rather than a generic task or booking — the schema demanded the right fields: priority, court date, practice area, status history. Get the noun right and the data model mostly writes itself.
+
+The most-requested missing piece is a client portal — clients calling to ask "what's happening with my case" is the single biggest time sink Lexa doesn't yet absorb. That's the next meaningful build, and it forces the auth model to grow a second, externally-facing tier.
+</Lessons>
