@@ -44,7 +44,7 @@ The half that makes it *global* is a thin presentation layer the rest of the app
   number="01"
   title="Store one base price, format it per shopper"
   chose="Numeric base-currency (USD) amounts behind a single <Price> render seam"
-  rejected="Currency-formatted price strings from the CMS (e.g. \"£24.99\")"
+  rejected="Currency-formatted price strings baked into the CMS, e.g. £24.99"
   why="Roughly a third of cross-border carts are abandoned when prices aren't shown in the buyer's own currency — the friction isn't the amount, it's the mental conversion. Storing one numeric amount and formatting it at render means a single currency switch reprices the whole site instantly, through one component. Formatted strings would have baked a single market into the data itself, and 'add a second currency' would have meant rewriting every component that shows a price."
 />
 
