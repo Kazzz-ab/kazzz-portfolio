@@ -1,8 +1,8 @@
 ---
 title: Meridian
 slug: meridian
-summary: Webflow template for professional service firms with an AI-powered consultation form backed by a Vercel serverless function.
-problem_oneliner: Small professional service firms need a marketing site that converts — not a template with a bolt-on chatbot.
+summary: Hand-coded, white-label landing page for service businesses with an instant AI intake — one config file reskins the entire site to any industry.
+problem_oneliner: Service businesses lose leads to slow replies — and need a site that reskins per client without a rebuild.
 order: 4
 featured: false
 status: shipped
@@ -11,12 +11,12 @@ role: Solo full-stack
 timeline: 1 week
 domain: Marketing systems
 client_type: Portfolio
-primary_stack: [Webflow, TypeScript, Vercel Serverless]
+primary_stack: ["Static HTML/CSS/JS", "TypeScript", "Vercel Serverless"]
 ai_layer: [Gemini API]
-deployment: Vercel + Webflow
+deployment: Vercel
 repo_url: https://github.com/Kazzz-ab/Meridian
 architecture_diagram: /diagrams/meridian.svg
-tags: [webflow, architecture]
+tags: [landing-page, white-label, architecture]
 related_work: []
 related_writing: []
 embedding_ready: true
@@ -25,90 +25,92 @@ accent_color: "#B89968"
 ---
 
 <Problem>
-Small professional service firms — law practices, consultancies, accounting firms — need a marketing site that converts enquiries into consultations. Most Webflow templates solve the design problem but leave the form as a static email trigger. The gap is the handoff: a visitor submits a contact form, gets a generic "we'll be in touch" message, and the business receives an unstructured email with no routing signal.
+Service businesses — clinics, law firms, trades, studios, consultancies — lose leads at the one moment a template ignores: the gap between enquiry and reply. The research is blunt about it. Leads answered within five minutes are ~21× more likely to convert; 78% of buyers go with whoever responds first; yet most businesses miss the five-minute window entirely. A prettier hero doesn't fix that.
 
-Meridian solves one specific problem: the form submission should generate a tailored acknowledgement for the visitor and a structured routing summary for the business, without requiring the firm to build or maintain any backend infrastructure.
+There's a second problem if you want to *sell* the site rather than build one: every service business needs the same shape of page with different words and colours. Rebuilding it per client doesn't scale.
+
+Meridian solves both. It's a conversion-first landing page that *demonstrates* instant, tailored intake instead of describing it — and it reskins to any service industry from a single config file, with no markup changes.
 </Problem>
 
 <Architecture diagram="/diagrams/meridian.svg">
-The project is two parts with different natures. The website is built in Webflow — design, layout, CMS collections (Services, Case Studies with ROI metric fields, Testimonials, Team), and responsiveness all handled in the Webflow Designer. No hand-coded frontend. The engineering signal is not a custom UI — it's the clean integration of the one custom feature.
+The project is two parts with different natures. The site is hand-coded static files (`index.html`, `contact.html`, `style.css`) painted by a small vanilla-JS render engine (`render.js`) from one config (`config.js`). No framework, no build step — a landing page lives or dies on load speed, and speed is conversion. Every word and colour lives in the config; the theme is three CSS custom properties (`--accent`, `--accent-2`, `--accent-ink`) that every gradient, glow, and chip derives from. Switching industry re-themes and re-renders the page in place, and the chosen skin persists across pages via `localStorage`.
 
-That feature is a Vercel serverless function (`/api/consult`) that the Webflow form posts to. The function validates the submission, applies rate limiting and a honeypot field to block spam, then makes a single structured call to Gemini. Gemini returns two things: a warm, personalised acknowledgement shown to the visitor, and a concise internal routing summary (category, urgency, suggested service) that goes to the business. Optional Zapier/Make automation can pipe the lead and summary to a CRM.
+The one piece of backend is a Vercel serverless function (`/api/consult`). The contact form posts to it; the function validates the submission, applies a honeypot and per-IP rate limit, then makes a single structured call to Gemini. Gemini returns two things: a warm, on-brand acknowledgement shown to the visitor, and a concise internal routing summary (category, urgency, suggested service, notes) for the business to action. The prompt is templated with the visitor-supplied brand and industry, and routing categories are industry-agnostic so the same endpoint serves every skin.
 </Architecture>
 
-<Decisions subtitle="Two decisions that kept this project honest.">
+<Decisions subtitle="Three decisions that made it a product, not a page.">
 
 <Decision
   number="01"
-  title="Webflow over a custom-coded frontend"
-  chose="Webflow for the entire site — design, layout, CMS, responsiveness"
-  rejected="Next.js custom frontend, Astro, static site generator"
-  why="A marketing site for a professional services firm needs to be maintainable by a non-technical owner. Webflow's CMS means the client can update case studies, team members, and services without a developer. A hand-coded frontend would produce a better developer portfolio piece but a worse product. Presenting this honestly — as a Webflow build — is the more defensible position: it shows judgment about tool selection, not just code output."
+  title="White-label by config, not per-client rebuilds"
+  chose="A single config.js (brand, 3 theme colours, all copy per industry) + CSS-variable theming"
+  rejected="Duplicating the codebase per client, a CMS, or a drag-and-drop page builder"
+  why="The resale unit is a reskin — brand, palette, words — not a rebuild. Pushing every string and colour into one file (and reducing the palette to three CSS variables) is what turns 'a site' into a sellable, reskinnable product. If copy had stayed in the HTML, it could never resell. Five industry skins ship in one codebase: consulting, law, dental, home services, fitness."
 />
 
 <Decision
   number="02"
-  title="Stateless one-shot function over a multi-turn chatbot"
-  chose="Stateless serverless function: validate → call Gemini → return acknowledgement + summary"
-  rejected="Stateful chatbot, multi-turn conversation, streaming response"
-  why="The brief was an AI-enhanced contact form, not a chatbot. Scope creep toward a multi-turn experience would have multiplied complexity (session state, conversation history, moderation) without improving the conversion metric. A visitor submitting a contact form wants confirmation, not a conversation. The one-shot constraint also makes the function trivially testable — one input, one deterministic output shape."
+  title="Hand-coded static over a framework or no-code builder"
+  chose="Plain HTML/CSS with a tiny vanilla-JS render engine"
+  rejected="Next.js, Astro, or a no-code site builder"
+  why="A marketing page should load instantly and have its polish in CSS, not in a runtime. No build step, trivially hostable, and the engineering signal is a clean data-driven render rather than framework boilerplate. The 2026 design language — aurora gradients, glassmorphism, a bento services grid — is all CSS over a 5KB engine."
+/>
+
+<Decision
+  number="03"
+  title="Stateless one-shot intake over a chatbot"
+  chose="Validate → call Gemini once → return acknowledgement + routing summary"
+  rejected="A stateful, multi-turn chatbot on the contact form"
+  why="A visitor submitting a form wants confirmation, not a conversation. A one-shot constraint kept the function small and trivially testable — one input, one deterministic output shape — and resisted the scope creep of session state, history, and moderation that a chatbot drags in."
 />
 
 </Decisions>
 
-<Code title="The consultation endpoint">
-{`// api/consult.ts
-import { GoogleGenerativeAI } from "@google/generative-ai";
+<Code title="The white-label core: one config entry, three theme tokens">
+{`// config.js — one entry per client; this file IS the product
+MERIDIAN_CONFIG.industries.dental = {
+  brand: { name: "Brightway", suffix: "Dental Studio", email: "smile@…" },
+  theme: { accent: "#38bdf8", accent2: "#5eead4", accentInk: "#03121c" },
+  hero: { /* … */ }, services: { /* … */ },
+  pricing: { /* … */ }, faq: [ /* … */ ],
+};
 
-const ROUTING_PROMPT = \`You are an intake assistant for a professional services firm.
-Given an enquiry, return a JSON object with two fields:
-- acknowledgement: a warm, personalised 2-sentence response for the visitor
-- routing: { category, urgency, suggestedService }
-Respond ONLY with valid JSON.\`;
-
-export default async function handler(req: Request) {
-  // Rate limit: 10 req/min per IP
-  if (isRateLimited(req)) return new Response("Too Many Requests", { status: 429 });
-
-  const { name, email, enquiry, _honeypot } = await req.json();
-  if (_honeypot) return new Response("OK", { status: 200 }); // silent discard
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-  const result = await model.generateContent(
-    \`\${ROUTING_PROMPT}\n\nEnquiry from \${name}: \${enquiry}\`
-  );
-
-  const { acknowledgement, routing } = JSON.parse(result.response.text());
-  // Pipe routing to CRM via webhook (optional)
-  await notifyCRM({ name, email, routing });
-
-  return Response.json({ acknowledgement });
+// render.js — switching skin re-themes + re-renders in place
+function switchTo(key) {
+  const d = MERIDIAN_CONFIG.industries[key];
+  const r = document.documentElement.style;
+  r.setProperty("--accent",     d.theme.accent);   // every gradient,
+  r.setProperty("--accent-2",   d.theme.accent2);  // glow and chip
+  r.setProperty("--accent-ink", d.theme.accentInk);// derives from these
+  renderHero(d.hero); renderServices(d.services);
+  renderPricing(d.pricing); renderFaq(d.faq); /* … */
+  localStorage.setItem("meridian-industry", key);  // persists across pages
 }`}
 </Code>
 
 <Outcomes>
 <Works>
-- Webflow site with CMS-driven Services, Case Studies (with ROI metric fields), Testimonials, Team
-- Contact form generates personalised visitor acknowledgement via Gemini
-- Internal routing summary (category, urgency, suggested service) delivered to business
-- Rate limiting and honeypot spam protection on the serverless function
-- Calendly embed for appointment booking — no custom calendar built
-- Reskinnable to a new industry via Webflow brand tokens + CMS content swap
+- Hand-coded static site, fully config-driven — five industry skins ship in one codebase (consulting, law, dental, home services, fitness)
+- One-file reskin: brand, three theme colours, and all copy per industry; live switcher, `?industry=` override, and `localStorage` persistence
+- Conversion-first sections: an animated live AI-intake demo in the hero, count-up stats, bento services, measured results, transparent pricing, a risk-reversal guarantee, and an FAQ accordion
+- AI intake: serverless function returns a tailored, on-brand acknowledgement for the visitor plus a structured routing summary for the business
+- Brand/industry-aware prompt with industry-agnostic routing categories; honeypot + per-IP rate limit
+- Responsive and reduced-motion aware, with a sticky mobile CTA bar
 </Works>
 <DoesntYet>
-- Zapier/Make CRM pipe is optional and not configured in the demo deploy
-- No real-time availability calendar — deferred by design
-- Client portal — explicitly out of scope for v1
-- The routing summary is not persisted anywhere in the demo — production use needs a CRM destination
+- Booking is a drop-in slot for Calendly / Cal.com — not a built calendar
+- The routing summary isn't persisted in the demo — production needs a CRM/Sheet/Slack webhook destination
+- The rate limiter is in-memory (resets on cold start) — swap for Upstash/KV at scale
+- Enquiry input is XML-framed against prompt injection but has no dedicated content filter — a compliance deployment would add one
 </DoesntYet>
 </Outcomes>
 
 <Lessons>
-Presenting a Webflow project honestly is better than obscuring it. The first instinct was to lead with "serverless AI integration" and bury that the site is no-code. The better framing — and the one that actually signals judgment — is to say upfront: Webflow was the right tool for the site, and this is what the one custom build looks like. Buyers who understand tool selection will respect that more than a hand-coded static site that doesn't need to exist.
+The product insight beat the design polish. What sells a service business isn't a nicer hero — it's replying first. Building the hero to *demonstrate* instant intake (an enquiry being answered in seconds, auto-tagged and routed) rather than to describe it is the entire pitch, and it's what reframed a generic consultancy site into something sellable.
 
-The one-shot constraint was the right guardrail. There was a 20-minute temptation to add streaming and a follow-up question turn. Cutting that kept the function under 80 lines and the test surface trivial. On a build this small, scope discipline is the whole game.
+White-label is an architecture decision, not a theming afterthought. Reducing the palette to three CSS variables and moving every word into one config is the difference between "a site I built" and "a product I can resell to the next client by editing one file." Had the copy stayed in the markup, none of that would be true.
 
-Gemini was the right call for this project (good structured output, fast, low cost per call), but if this were a production deployment with compliance requirements, I'd want explicit content filtering on the enquiry before it reaches the model. The honeypot and rate limit handle spam volume; they don't handle adversarial prompt injection in the enquiry field.
+Replacing the earlier Webflow approach with hand-coded static was the right call for this use case: faster load, no build step, and the engineering signal is a clean, data-driven render. The first version leaned on a no-code framing; the rebuild made that unnecessary — it's genuinely custom now, and honest by construction.
+
+Keeping the AI scope tight paid off. A stateless one-shot intake stayed under ~80 lines and trivially testable. On a build this small, scope discipline is the whole game.
 </Lessons>
