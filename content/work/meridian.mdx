@@ -1,8 +1,8 @@
 ---
 title: Meridian
 slug: meridian
-summary: Hand-coded, white-label landing page for service businesses with an instant AI intake — one config file reskins the entire site to any industry.
-problem_oneliner: Service businesses lose leads to slow replies — and need a site that reskins per client without a rebuild.
+summary: A conversion-first landing page that wins the lead by replying first — every enquiry gets a tailored, on-brand answer in seconds, and the whole site reskins to any service business from one config file.
+problem_oneliner: By the time most service businesses reply to an enquiry, the lead has already bought from whoever answered first.
 order: 4
 featured: false
 status: shipped
@@ -25,17 +25,17 @@ accent_color: "#B89968"
 ---
 
 <Problem>
-Service businesses — clinics, law firms, trades, studios, consultancies — lose leads at the one moment a template ignores: the gap between enquiry and reply. The research is blunt about it. Leads answered within five minutes are ~21× more likely to convert; 78% of buyers go with whoever responds first; yet most businesses miss the five-minute window entirely. A prettier hero doesn't fix that.
+Picture where a service business actually wins or loses a customer. Someone with a problem they finally want handled — a toothache, a lawsuit, a leaking roof, a stalling company — works up the nerve to fill in a contact form, hits send, and gets "thanks, we'll be in touch." Then nothing. So they open the next two tabs and enquire there too. Whoever replies first, sounding like a real person who actually read the question, gets the call. The firm that gets back to them tomorrow morning gets a "thanks, but we've gone with someone else."
 
-There's a second problem if you want to *sell* the site rather than build one: every service business needs the same shape of page with different words and colours. Rebuilding it per client doesn't scale.
+This isn't a hunch. A lead answered within five minutes is ~21× more likely to convert than one answered after thirty, 78% of buyers go with the company that responds first, and most businesses miss that five-minute window entirely. What loses the deal is never the prettiness of the page — it's the dead air after the form. And there's a second person to keep in mind: whoever wants to *sell* a page like this. A clinic, a law firm, a consultancy, and a gym all need the same shape of site in different words and colours, and none of them will pay to have it rebuilt from scratch.
 
-Meridian solves both. It's a conversion-first landing page that *demonstrates* instant, tailored intake instead of describing it — and it reskins to any service industry from a single config file, with no markup changes.
+Meridian is built for both heads. For the prospect, it doesn't just promise a fast reply — the hero *shows* one happening, then the real form delivers it: a tailored, on-brand answer in seconds, so they feel heard before a competitor has opened the email. For the business, every enquiry also lands pre-qualified — category, urgency, the right service — so they can reply first and win. And for whoever is reselling it, the entire site (brand, colours, every line of copy) reskins to a new industry by editing one config file.
 </Problem>
 
 <Architecture diagram="/diagrams/meridian.svg">
 The project is two parts with different natures. The site is hand-coded static files (`index.html`, `contact.html`, `style.css`) painted by a small vanilla-JS render engine (`render.js`) from one config (`config.js`). No framework, no build step — a landing page lives or dies on load speed, and speed is conversion. Every word and colour lives in the config; the theme is three CSS custom properties (`--accent`, `--accent-2`, `--accent-ink`) that every gradient, glow, and chip derives from. Switching industry re-themes and re-renders the page in place, and the chosen skin persists across pages via `localStorage`.
 
-The one piece of backend is a Vercel serverless function (`/api/consult`). The contact form posts to it; the function validates the submission, applies a honeypot and per-IP rate limit, then makes a single structured call to Gemini. Gemini returns two things: a warm, on-brand acknowledgement shown to the visitor, and a concise internal routing summary (category, urgency, suggested service, notes) for the business to action. The prompt is templated with the visitor-supplied brand and industry, and routing categories are industry-agnostic so the same endpoint serves every skin.
+The one piece of backend is a Vercel serverless function (`/api/consult`). The contact form posts to it; the function applies a honeypot and dual-window rate limit, validates the submission, then makes a single structured call to Gemini. The prompt locks the model to one job — acknowledging enquiries and bookings — and the response carries an `onTopic` flag: anything else (code generation, essays, planning, general questions) is refused server-side with a fixed reply, so the AI can't be turned into free general-purpose compute. On a genuine enquiry Gemini returns a warm, on-brand acknowledgement for the visitor plus an internal routing summary (category, urgency, suggested service, notes). The prompt is templated with the visitor-supplied brand and industry, and routing categories are industry-agnostic so the same endpoint serves every skin.
 </Architecture>
 
 <Decisions subtitle="Three decisions that made it a product, not a page.">
@@ -94,14 +94,15 @@ function switchTo(key) {
 - One-file reskin: brand, three theme colours, and all copy per industry; live switcher, `?industry=` override, and `localStorage` persistence
 - Conversion-first sections: an animated live AI-intake demo in the hero, count-up stats, bento services, measured results, transparent pricing, a risk-reversal guarantee, and an FAQ accordion
 - AI intake: serverless function returns a tailored, on-brand acknowledgement for the visitor plus a structured routing summary for the business
-- Brand/industry-aware prompt with industry-agnostic routing categories; honeypot + per-IP rate limit
-- Responsive and reduced-motion aware, with a sticky mobile CTA bar
+- Scope-locked AI — handles enquiries and bookings only; off-topic or jailbreak attempts get a server-side canned refusal (the model's text is never echoed), with output sanitising and length caps
+- Abuse protection: honeypot, dual-window in-memory rate limit, and an optional durable Upstash layer; XML-framed, untrusted-by-default enquiry input
+- Mobile-first and reduced-motion aware: stacked CTAs, compact controls, touch feedback, and a sticky mobile CTA bar
 </Works>
 <DoesntYet>
 - Booking is a drop-in slot for Calendly / Cal.com — not a built calendar
 - The routing summary isn't persisted in the demo — production needs a CRM/Sheet/Slack webhook destination
-- The rate limiter is in-memory (resets on cold start) — swap for Upstash/KV at scale
-- Enquiry input is XML-framed against prompt injection but has no dedicated content filter — a compliance deployment would add one
+- Durable rate limiting is opt-in (Upstash REST) — without those env vars the in-memory limiter resets on cold start
+- The scope gate blocks misuse, but there's no dedicated harmful-content classifier — a compliance deployment would add one
 </DoesntYet>
 </Outcomes>
 

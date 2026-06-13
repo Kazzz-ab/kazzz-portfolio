@@ -1,61 +1,67 @@
-<svg viewBox="0 0 500 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="meridian-title meridian-desc">
-  <title id="meridian-title">Meridian Architecture</title>
-  <desc id="meridian-desc">A hand-coded static site driven by one config file posts the contact form to a single Vercel serverless function, which runs CORS, a per-IP rate limit, a honeypot and zod validation, then calls Gemini 1.5 Flash and returns an on-brand acknowledgement to the visitor plus a structured routing summary; the routing summary optionally pipes to a CRM, Slack or sheet, and booking is a drop-in scheduler slot.</desc>
+<svg viewBox="0 0 500 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="meridian-title meridian-desc">
+  <title id="meridian-title">Meridian — the buyer's-eye value flow</title>
+  <desc id="meridian-desc">A visitor on your landing page sends an enquiry at any hour; the /api/consult serverless function validates it and calls Gemini 1.5 Flash, which returns a tailored on-brand reply to the visitor in seconds — so they don't bounce to a rival — and a pre-qualified, routed lead to your team, so you reply first and win. The lead optionally pipes to a CRM, Slack or sheet, and one config file reskins the whole site to any industry.</desc>
 
-  <!-- Static site -->
-  <rect x="18" y="52" width="132" height="116" rx="2" stroke="#B89968" stroke-width="0.5"/>
-  <text x="84" y="70" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">Static site</text>
-  <line x1="28" y1="77" x2="140" y2="77" stroke="#3A3A38" stroke-width="0.5"/>
-  <text x="84" y="93" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">config.js · 5 skins</text>
-  <text x="84" y="107" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">render.js</text>
-  <text x="84" y="121" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">style.css</text>
-  <text x="84" y="145" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">contact form ↓</text>
+  <!-- Caption: the buyer thesis -->
+  <text x="250" y="24" text-anchor="middle" font-family="monospace" font-size="12" fill="#B89968">Reply first. Win the client.</text>
+  <text x="250" y="40" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">21× more likely to convert when you answer within 5 min — 78% buy from whoever replies first</text>
 
-  <!-- Arrow back: reply to visitor (fn -> site) -->
-  <line x1="197" y1="116" x2="154" y2="112" stroke="#3A3A38" stroke-width="0.5"/>
-  <polygon points="159,109 152,112 159,115" fill="#3A3A38"/>
-  <text x="175" y="107" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">reply</text>
+  <!-- Above-box head labels (the two audiences) -->
+  <text x="81" y="82" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">peak buying intent</text>
+  <text x="420" y="82" text-anchor="middle" font-family="monospace" font-size="7" fill="#B89968">you reply first — you win</text>
 
-  <!-- Arrow: form submit (site -> fn) -->
-  <line x1="150" y1="140" x2="195" y2="140" stroke="#B89968" stroke-width="0.5"/>
-  <polygon points="195,137 200,140 195,143" fill="#B89968"/>
-  <text x="172" y="135" text-anchor="middle" font-family="monospace" font-size="8" fill="#B89968">POST</text>
+  <!-- Visitor -->
+  <rect x="22" y="90" width="118" height="76" rx="2" stroke="#B89968" stroke-width="0.5"/>
+  <text x="81" y="108" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">Visitor</text>
+  <line x1="32" y1="115" x2="130" y2="115" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="81" y="131" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">your landing page</text>
+  <text x="81" y="145" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">sends an enquiry</text>
+  <text x="81" y="159" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">midnight · weekend · mobile</text>
 
-  <!-- Vercel function -->
-  <rect x="198" y="92" width="126" height="92" rx="2" stroke="#B89968" stroke-width="0.5"/>
-  <text x="261" y="110" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">/api/consult</text>
-  <text x="261" y="123" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">Vercel fn</text>
-  <line x1="208" y1="130" x2="314" y2="130" stroke="#3A3A38" stroke-width="0.5"/>
-  <text x="261" y="145" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">CORS · rate-limit</text>
-  <text x="261" y="157" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">honeypot</text>
-  <text x="261" y="169" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A5A55">validate · zod</text>
+  <!-- Engine (the mechanism) -->
+  <rect x="191" y="90" width="118" height="80" rx="2" stroke="#B89968" stroke-width="0.5"/>
+  <text x="250" y="108" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">/api/consult</text>
+  <text x="250" y="121" text-anchor="middle" font-family="monospace" font-size="8" fill="#B89968">Gemini 1.5 Flash</text>
+  <line x1="201" y1="128" x2="299" y2="128" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="250" y="143" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">validate · rate-limit</text>
+  <text x="250" y="156" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">honeypot · injection guard</text>
 
-  <!-- Arrow to Gemini (request) -->
-  <line x1="324" y1="116" x2="372" y2="106" stroke="#3A3A38" stroke-width="0.5"/>
-  <polygon points="369,103 374,106 370,111" fill="#3A3A38"/>
+  <!-- Business -->
+  <rect x="360" y="90" width="120" height="76" rx="2" stroke="#B89968" stroke-width="0.5"/>
+  <text x="420" y="108" text-anchor="middle" font-family="monospace" font-size="9" fill="#B89968">Your team</text>
+  <line x1="370" y1="115" x2="470" y2="115" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="420" y="131" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">a pre-qualified lead</text>
+  <text x="420" y="145" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">category · urgency</text>
+  <text x="420" y="159" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">service · notes</text>
 
-  <!-- Gemini -->
-  <rect x="374" y="86" width="104" height="58" rx="2" stroke="#3A3A38" stroke-width="0.5"/>
-  <text x="426" y="106" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8A82">Gemini 1.5 Flash</text>
-  <text x="426" y="121" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">acknowledgement</text>
-  <text x="426" y="133" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">+ routingSummary</text>
+  <!-- Visitor -> Engine: enquiry -->
+  <line x1="140" y1="118" x2="189" y2="118" stroke="#B89968" stroke-width="0.5"/>
+  <polygon points="189,115 194,118 189,121" fill="#B89968"/>
+  <text x="165" y="112" text-anchor="middle" font-family="monospace" font-size="8" fill="#B89968">enquiry</text>
 
-  <!-- Arrow back: ack + route (Gemini -> fn) -->
-  <line x1="372" y1="130" x2="327" y2="148" stroke="#B89968" stroke-width="0.5" stroke-dasharray="3 2"/>
-  <polygon points="332,145 325,148 331,153" fill="#B89968"/>
-  <text x="350" y="166" text-anchor="middle" font-family="monospace" font-size="7" fill="#B89968">ack + route</text>
+  <!-- Engine -> Visitor: reply (the payoff) -->
+  <line x1="189" y1="140" x2="142" y2="140" stroke="#B89968" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <polygon points="147,137 140,140 147,143" fill="#B89968"/>
+  <text x="165" y="153" text-anchor="middle" font-family="monospace" font-size="8" fill="#B89968">reply</text>
 
-  <!-- routingSummary pipe (-> CRM) -->
-  <line x1="426" y1="144" x2="426" y2="166" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="2 2"/>
-  <polygon points="423,163 426,169 429,163" fill="#3A3A38"/>
+  <!-- Engine -> Business: routed lead -->
+  <line x1="309" y1="124" x2="358" y2="124" stroke="#B89968" stroke-width="0.5"/>
+  <polygon points="358,121 363,124 358,127" fill="#B89968"/>
+  <text x="334" y="118" text-anchor="middle" font-family="monospace" font-size="8" fill="#B89968">lead</text>
 
-  <!-- CRM optional -->
-  <rect x="374" y="168" width="104" height="36" rx="2" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="3 2"/>
-  <text x="426" y="185" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">CRM · Slack · Sheet</text>
-  <text x="426" y="197" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">(optional)</text>
+  <!-- Visitor payoff -->
+  <text x="81" y="181" text-anchor="middle" font-family="monospace" font-size="8" fill="#B89968">a real reply in seconds</text>
+  <text x="81" y="192" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">so they don't bounce</text>
 
-  <!-- Booking slot -->
-  <rect x="18" y="180" width="132" height="28" rx="2" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="3 2"/>
-  <text x="84" y="192" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">Booking · drop-in slot</text>
-  <text x="84" y="203" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">Calendly / Cal.com</text>
+  <!-- routingSummary pipe -> CRM -->
+  <line x1="420" y1="166" x2="420" y2="179" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <polygon points="417,176 420,182 423,176" fill="#3A3A38"/>
+  <rect x="360" y="180" width="120" height="30" rx="2" stroke="#3A3A38" stroke-width="0.5" stroke-dasharray="3 2"/>
+  <text x="420" y="194" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">CRM · Slack · Sheet</text>
+  <text x="420" y="204" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">(optional)</text>
+
+  <!-- Resale footer (the owner / agency win) -->
+  <line x1="40" y1="223" x2="460" y2="223" stroke="#3A3A38" stroke-width="0.5"/>
+  <text x="250" y="238" text-anchor="middle" font-family="monospace" font-size="8" fill="#5A5A55">One config file reskins the whole site — consulting · legal · dental · home services · fitness</text>
+  <text x="250" y="249" text-anchor="middle" font-family="monospace" font-size="7" fill="#5A5A55">brand · 3 colours · every line of copy — no rebuild per client</text>
 </svg>
