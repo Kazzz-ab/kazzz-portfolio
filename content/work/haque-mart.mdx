@@ -1,8 +1,8 @@
 ---
 title: Haque Mart
 slug: haque-mart
-summary: Headless WooCommerce storefront for the Bangladeshi SME market, built on Next.js with a pluggable payment adapter.
-problem_oneliner: Most commerce stacks assume Stripe-first markets — in Bangladesh, bKash and SSLCommerz are the primary rails.
+summary: A storefront a small brand anywhere can be proud to run — every price in the shopper's own currency, every word in their language (right-to-left included), and a finish premium enough to earn a stranger's first order. Headless WooCommerce on Next.js.
+problem_oneliner: A shop that looks local stays local — and a checkout that quotes the wrong currency is where roughly a third of cross-border buyers quietly leave.
 order: 3
 featured: false
 status: shipped
@@ -11,11 +11,12 @@ role: Solo full-stack
 timeline: 3 weeks
 domain: E-commerce
 client_type: Portfolio
-primary_stack: [Next.js, TypeScript, WooCommerce, WPGraphQL]
+primary_stack: [Next.js, TypeScript, Tailwind CSS, WooCommerce, WPGraphQL]
 ai_layer: null
 deployment: Vercel
 repo_url: https://github.com/Kazzz-ab/HaqueMart
-tags: [commerce, headless, nextjs, payments]
+demo_url: https://haquemart.vercel.app
+tags: [commerce, headless, i18n, nextjs]
 related_work: []
 related_writing: []
 embedding_ready: true
@@ -24,91 +25,88 @@ accent_color: "#B89968"
 ---
 
 <Problem>
-Most headless commerce stacks are designed for Stripe-first markets. For SMEs in Bangladesh, the dominant payment methods are bKash (mobile money) and SSLCommerz — neither of which slots cleanly into a Stripe-shaped payment interface. Building around Stripe and treating bKash as an afterthought means redesigning the checkout flow when the primary payment method lands.
+Picture a small brand with genuinely good products and a shop that works — at home. Then someone in Berlin, or Dubai, or Toronto finds it. They see prices in a currency that isn't theirs and start doing mental maths. A checkout that assumes one country. Copy in one language. A layout that quietly says "local." They don't complain — they just close the tab. The owner never sees the sale that didn't happen; on the dashboard it only ever looks like "overseas visitors don't convert."
 
-The constraint here was architectural: the payment layer had to be an interface, not a dependency. The storefront couldn't know or care which provider was active. That contract had to be established before the first checkout component was written.
+That gap is rarely the product, and almost never the price itself — it's everything *around* the price. Buying from a foreign brand you've never heard of is an act of trust, and that trust is won or lost in the first scroll: is this in my money, in my language, does it look like somewhere I'd hand over a card? A storefront that broadcasts "small and local" keeps good products small and local.
+
+Haque Mart is the rebuild of a single-market shop into something an SME *anywhere* could run and be proud of. It quotes every price in the visitor's own currency, speaks their language — right-to-left included — and trades the busy, discount-shouting look of a local shop for the restraint of a brand that expects to be trusted. The goal was narrow and human: make a stranger's first order feel safe.
 </Problem>
 
 <Architecture diagram="/diagrams/haque-mart.svg">
-The architecture is two layers with a clean seam between them. WordPress + WooCommerce handles the product catalogue, inventory, and order state — accessed exclusively through WPGraphQL. The Next.js frontend consumes it at build time (static product pages) and at request time (cart, checkout). When the WordPress endpoint is absent, a mock data fallback activates automatically, letting the frontend run and demo without a backend dependency.
+The commerce half is a clean headless seam. WordPress + WooCommerce owns the catalogue, inventory, and orders, reached only through WPGraphQL; the Next.js frontend renders product pages on the server. When the WordPress endpoint isn't configured, a curated mock catalogue activates automatically — so the storefront runs, demos, and can be shown to a client with no backend wired at all.
 
-The payment layer sits behind a `PaymentProvider` interface. Any provider — Stripe, bKash, SSLCommerz — implements the same three methods: `initiate`, `confirm`, `refund`. The checkout component calls the interface; it never imports a specific provider directly. Swapping providers is a config change, not a refactor.
+The half that makes it *global* is a thin presentation layer the rest of the app never has to think about. Prices are stored once, as numeric base-currency (USD) amounts; a Currency context converts and formats them to the shopper's currency, and every price on the site renders through a single `<Price>` component — so switching from dollars to euros to dirhams reprices the entire store at once: cards, product page, cart, the free-shipping threshold, checkout. A Locale context resolves copy through a dictionary with English fallback and sets the document's text direction, so Arabic mirrors the whole layout to right-to-left. A shopper picks a region once; currency and language follow.
 </Architecture>
 
-<Decisions subtitle="Three decisions that defined the project's architecture.">
+<Decisions subtitle="Three decisions that turned a local shop into a global one.">
 
 <Decision
   number="01"
-  title="WPGraphQL over WooCommerce REST API"
-  chose="WPGraphQL for typed, filterable product queries"
-  rejected="WooCommerce REST API, custom REST endpoints"
-  why="WPGraphQL lets you request exactly the fields you need — product images, variants, stock status, reviews — in a single typed query. The REST API returns over-fetched payloads and requires multiple round-trips for nested data (e.g. product + category + reviews). GraphQL Codegen then generates TypeScript types from the schema automatically, so the frontend and backend are always in sync without manual type maintenance."
+  title="Store one base price, format it per shopper"
+  chose="Numeric base-currency (USD) amounts behind a single <Price> render seam"
+  rejected="Currency-formatted price strings from the CMS (e.g. \"£24.99\")"
+  why="Roughly a third of cross-border carts are abandoned when prices aren't shown in the buyer's own currency — the friction isn't the amount, it's the mental conversion. Storing one numeric amount and formatting it at render means a single currency switch reprices the whole site instantly, through one component. Formatted strings would have baked a single market into the data itself, and 'add a second currency' would have meant rewriting every component that shows a price."
 />
 
 <Decision
   number="02"
-  title="PaymentProvider interface over Stripe-first wiring"
-  chose="Abstract `PaymentProvider` interface with provider implementations behind it"
-  rejected="Stripe SDK imported directly in checkout components"
-  why="The Bangladeshi SME market uses bKash and SSLCommerz as primary payment methods. Wiring Stripe directly into checkout components would mean a refactor when those providers land — not a config swap. The interface adds one abstraction layer; it pays for itself the first time the active provider changes without a UI code change."
+  title="Internationalization as a provider layer, not a translation bolt-on"
+  chose="Currency + language + region behind React context, RTL-ready, with a region that presets the other two"
+  rejected="A translate plugin layered over the existing single-region storefront"
+  why="'Global' is a trust-and-checkout problem, not just a strings problem. Currency, language, and shipping region travel together — a visitor in the UAE wants dirhams, Arabic, and a layout that reads right-to-left. Modelling region as the thing that presets currency and language lets a shopper choose once and have the whole store follow; selecting Arabic flips the document direction and the layout mirrors for free, instead of being a special case bolted on at the end."
 />
 
 <Decision
   number="03"
-  title="Mock data fallback as a first-class feature"
-  chose="Explicit `isWpConfigured()` gate that activates curated mock data"
-  rejected="Hardcoded WP endpoint requirement, error boundary with fallback UI"
-  why="The frontend should be deployable and demo-able without a live WooCommerce backend. A mock data layer that activates automatically when the WP URL is absent means the UI can be reviewed, tested, and shown to clients before the backend is wired. The 'Demo mode' banner signals the distinction clearly to anyone viewing the deploy."
+  title="Premium by subtraction — cut the urgency theatrics"
+  chose="Quiet trust signals: verified reviews, real stock counts only, editorial restraint"
+  rejected="Countdown timers, 'Only 2 left!', '🔥 14 sold today', rotating flash-sale bars"
+  why="A first-time cross-border buyer is already taking a risk on a brand they've never heard of. Fake scarcity and emoji read as a cheap local shop — exactly the signal that scares off a cautious stranger. Removing them did more for how premium and trustworthy the store feels than any feature I could have added. Looking expensive, it turns out, is mostly about what you leave out."
 />
 
 </Decisions>
 
-<Code title="PaymentProvider interface">
-{`// haque-mart/src/lib/payments/types.ts
-export interface PaymentProvider {
-  initiate(order: Order): Promise<PaymentSession>;
-  confirm(sessionId: string): Promise<PaymentResult>;
-  refund(orderId: string, amount: number): Promise<void>;
+<Code title="The price a shopper sees is computed in their currency — never hard-coded">
+{`// Prices are stored once, as a numeric base-currency (USD) amount.
+// The shopper's currency is applied at render — never baked into the data.
+
+// src/lib/i18n/currency.tsx
+const meta = CURRENCIES[currency];            // active currency: locale + rate
+const format = (usd: number) =>
+  new Intl.NumberFormat(meta.locale, { style: "currency", currency: meta.code })
+    .format(usd * meta.rate);
+
+// src/components/Price.tsx — the single seam every price flows through
+export function Price({ amount }: { amount: number }) {
+  const { format } = useCurrency();
+  return <span>{format(amount)}</span>;
 }
 
-// haque-mart/src/lib/payments/stripe.ts
-export class StripeProvider implements PaymentProvider {
-  async initiate(order: Order): Promise<PaymentSession> {
-    const intent = await stripe.paymentIntents.create({
-      amount: order.totalInCents,
-      currency: "bdt",
-    });
-    return { id: intent.id, clientSecret: intent.client_secret! };
-  }
-  // confirm, refund ...
-}
-
-// Checkout component never imports StripeProvider directly.
-// It receives a PaymentProvider via dependency injection.
-// Swapping to bKash = swap the injected implementation.`}
+// Switch currency once → every price on the page re-renders.
+// $32.00  →  29,44 €  →  £25.28  →  ﷼ 117.44   — same data, the shopper's money.`}
 </Code>
 
 <Outcomes>
 <Works>
-- Product catalogue with category filters and text search
-- WPGraphQL integration with TypeScript types auto-generated from schema
-- Mock data fallback with "Demo mode" banner — frontend runs without a live WP backend
-- Cart with localStorage persistence (survives page reload)
-- PaymentProvider interface in place — Stripe test-mode implemented
-- Fully responsive dark UI (amber-on-charcoal design system)
+- Multi-currency: eight currencies with live conversion + locale-correct formatting, persisted across visits — every price flows through one `<Price>` seam (cards, product page, cart, checkout, shipping threshold)
+- Multi-language with English-fallback `t()` (EN/ES/FR/AR); selecting Arabic flips the entire layout to right-to-left; a region picker presets currency + language together
+- Light editorial design system — warm neutrals, a deep teal jewel accent, Fraunces display type — that reads premium rather than "local web shop"
+- Headless WooCommerce over WPGraphQL with an automatic mock-catalogue fallback, so the frontend runs and demos with no backend
+- Cart + wishlist with localStorage persistence; an internationalized checkout (global country list, payment-method badges) and order confirmation
+- Curated product photography, calm scroll motion, and an app-like mobile experience
 </Works>
 <DoesntYet>
-- bKash and SSLCommerz provider implementations — interface is wired, providers are not
-- Real payment processing — Stripe is test-mode only
-- User accounts and order history
-- Inventory sync (WooCommerce stock updates don't trigger revalidation)
+- Real payment processing — checkout is a simulated submit; the payment-method UI is a placeholder where card / Apple Pay / PayPal would wire in
+- Exchange rates are a static demo table — production needs a live FX feed (the shape stays identical)
+- Translations cover the storefront chrome; product copy stays in its source language — a per-product translation layer is the next step
+- No user accounts or order history, and WooCommerce stock changes don't yet trigger revalidation
 </DoesntYet>
 </Outcomes>
 
 <Lessons>
-GraphQL Codegen is a genuine multiplier for a solo developer. The types update automatically when the schema changes — no manual sync between what WooCommerce returns and what TypeScript expects. The setup cost is one config file; the payoff is ongoing.
+The thing that made the store feel global wasn't translation — it was showing people their own money before they had to think. Currency is the trust unlock; copy is a distant second. The first time I switched from dollars to euros and watched every price, the cart, and the shipping threshold reprice at once, it stopped feeling like a demo and started feeling like a shop that ships to *you*.
 
-The mock fallback deserved more investment early. I added it midway through as a convenience for demos, but having it from day one would have made the frontend development loop faster. The UI should have been buildable against mock data from the first commit.
+Premium came mostly from subtraction. Pulling out the countdowns, the "Only 2 left," the emoji, and the flash-sale bar did more for how expensive the store looks than any font or photograph — a cautious buyer reads restraint as confidence. The hardest part wasn't adding polish; it was having the discipline to delete the things that were quietly working against trust.
 
-The `PaymentProvider` abstraction was the right call but I over-engineered the interface on the first pass — I included methods for subscriptions and webhooks before any provider needed them. The interface should have been the minimum needed: initiate, confirm, refund. Add to it when a real provider requires it.
+Storing prices as one numeric base amount and routing every render through a single `<Price>` seam is a tiny decision that only reveals its value the moment a second currency exists. Had the prices stayed as formatted strings baked into the data, "add a currency" would have meant touching every component instead of one. The cheapest time to make a thing global is before it has more than one of anything.
 </Lessons>
