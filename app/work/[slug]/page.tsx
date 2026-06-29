@@ -73,7 +73,6 @@ export default async function CaseStudyPage({ params }: Props) {
   type Artifact = { label: string; href: string };
   const artifacts: Artifact[] = (
     [
-      cs.repo_url ? { label: "github", href: cs.repo_url } : null,
       cs.demo_url ? { label: "live", href: cs.demo_url } : null,
       cs.loom_url ? { label: "loom", href: cs.loom_url } : null,
     ] as (Artifact | null)[]

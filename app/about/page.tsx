@@ -8,7 +8,7 @@ import { Reveal } from "@/components/ui/Reveal";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Kazi Abrarul Haque — full-stack engineer from Dhaka. Final-year CSE, North South University. Specialising in AI integration and production business systems.",
+    "Kazi Abrarul Haque — full-stack engineer from Dhaka. Studying CSE at North South University. Specialising in reliable AI integration and production systems.",
 };
 
 const stack = [
@@ -91,7 +91,7 @@ export default function AboutPage() {
         {/* Bio */}
         <Reveal as="section">
           <p className="text-[15px] text-body leading-[1.8] mb-4">
-            I&apos;m in my final year of Computer Science and Engineering at North South University in Dhaka.
+            I&apos;m studying Computer Science and Engineering at North South University in Dhaka.
             I started building production systems before the coursework caught up — and kept going from there.
           </p>
           <p className="text-[15px] text-body leading-[1.8]">
@@ -175,8 +175,8 @@ export default function AboutPage() {
               <span className="font-mono text-[10px] tracking-[0.08em] text-shipped">available for work</span>
             </div>
             <p className="text-[14px] text-body leading-[1.65] mb-3">
-              Final year CSE at North South University, Dhaka. Available for remote work from mid-2026 —
-              AI integration, full-stack product builds, architecture-led engagements.
+              Available for remote work now — AI integration, full-stack product builds, and
+              architecture-led engagements. Based in Dhaka (GMT+6), studying CSE at North South University.
             </p>
             <p className="text-[14px] text-body leading-[1.65]">
               Particularly interested in projects where the interesting problem is below the model:

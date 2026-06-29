@@ -58,12 +58,35 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
     if (e.key === "ArrowLeft")  scrollTo(Math.max(activeIndex - 1, 0));
   }
 
+  // Mouse drag-to-scroll (touch keeps native scrolling)
+  const drag = useRef({ down: false, startX: 0, startLeft: 0, moved: false });
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    const c = scrollRef.current; if (!c) return;
+    drag.current = { down: true, startX: e.clientX, startLeft: c.scrollLeft, moved: false };
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    const c = scrollRef.current; const d = drag.current;
+    if (!c || !d.down) return;
+    const dx = e.clientX - d.startX;
+    if (Math.abs(dx) > 4) { d.moved = true; c.style.scrollSnapType = "none"; }
+    c.scrollLeft = d.startLeft - dx;
+  };
+  const endDrag = () => {
+    const c = scrollRef.current;
+    if (c && drag.current.moved) c.style.scrollSnapType = "x mandatory";
+    drag.current.down = false;
+  };
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (drag.current.moved) { e.preventDefault(); e.stopPropagation(); drag.current.moved = false; }
+  };
+
   return (
     <div>
       {/* Slider — bleeds to the container edge (20px mobile / 28px md+) */}
       <div
         ref={scrollRef}
-        className="slider-mask flex gap-3.5 overflow-x-auto outline-none -mx-5 md:-mx-7 pl-5 md:pl-7 pb-3 cursor-grab active:cursor-grabbing"
+        className="slider-mask relative flex gap-3.5 overflow-x-auto outline-none -mx-5 md:-mx-7 pl-5 md:pl-7 pb-3 cursor-grab active:cursor-grabbing"
         style={{
           scrollSnapType: "x mandatory",
           scrollbarWidth: "none",
@@ -74,6 +97,11 @@ export function ProjectSlider({ projects, track }: ProjectSliderProps) {
         role="region"
         aria-label="Project slider"
         onKeyDown={handleKeyDown}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+        onClickCapture={onClickCapture}
       >
         {projects.map((project, i) => (
           <div key={project.slug} data-card style={{ scrollSnapAlign: "start", flexShrink: 0 }}>

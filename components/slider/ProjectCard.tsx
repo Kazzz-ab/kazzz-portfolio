@@ -144,12 +144,6 @@ export function ProjectCard({ project, track, trackOrder }: ProjectCardProps) {
           case study →
         </Link>
         <div className="flex items-center gap-3">
-          {project.repo_url && (
-            <a href={project.repo_url} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[10px] text-faint hover:text-muted transition-colors duration-150 inline-block py-2 -my-2">
-              github
-            </a>
-          )}
           {project.demo_url && (
             <a href={project.demo_url} target="_blank" rel="noopener noreferrer"
               className="font-mono text-[10px] text-faint hover:text-default transition-colors duration-150 inline-block py-2 -my-2">

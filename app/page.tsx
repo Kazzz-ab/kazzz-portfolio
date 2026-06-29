@@ -124,13 +124,13 @@ function TrackCard({
 }
 
 /* ─── Hero copy (split for the masked reveal) ───────────────────────────── */
-const HEADLINE: Array<{ w: string; cls?: string }> = [
-  { w: "Building" }, { w: "full-stack" }, { w: "business" }, { w: "solutions" },
-  { w: "at" }, { w: "the" }, { w: "crossroads" }, { w: "of" },
-  { w: "software", cls: "text-accent-ai" }, { w: "and" }, { w: "AI.", cls: "text-accent-biz" },
+const HEADLINE: Array<{ w?: string; cls?: string; br?: boolean }> = [
+  { w: "Software" }, { w: "that", cls: "text-[#cba24f]" }, { w: "ships.", cls: "text-[#cba24f]" },
+  { br: true },
+  { w: "AI" }, { w: "that" }, { w: "tells" }, { w: "the" }, { w: "truth.", cls: "text-[#3dd0c0]" },
 ];
 
-const EYEBROW = "— full-stack engineer · dhaka, bd —";
+const EYEBROW = "— full-stack + ai engineer · remote · gmt+6 —";
 
 /* ─── Page ──────────────────────────────────────────────────────────────── */
 export default function Home() {
@@ -214,53 +214,58 @@ export default function Home() {
             </p>
             <h1
               ref={headlineRef}
-              className="font-medium tracking-[-0.02em] text-primary leading-[1.1] mb-5 max-w-[560px]"
-              style={{ fontSize: "clamp(32px, 5vw, 52px)" }}
+              className="tracking-[-0.01em] text-primary leading-[1.04] mb-5 max-w-[600px]"
+              style={{ fontFamily: "var(--font-fraunces), Georgia, serif", fontSize: "clamp(34px, 6.6vw, 70px)", fontWeight: 500 }}
             >
-              {HEADLINE.map(({ w, cls }, i) => (
-                <span key={i}>
-                  <span className="inline-block overflow-hidden align-bottom pb-[0.1em] -mb-[0.1em]">
-                    <span data-hero-word className={`inline-block translate-y-[110%] ${cls ?? ""}`}>
-                      {w}
-                    </span>
-                  </span>{" "}
-                </span>
-              ))}
+              {HEADLINE.map(({ w, cls, br }, i) =>
+                br ? (
+                  <span key={i} className="block w-full" aria-hidden="true" />
+                ) : (
+                  <span key={i}>
+                    <span className="inline-block overflow-hidden align-bottom pb-[0.1em] -mb-[0.1em]">
+                      <span data-hero-word className={`inline-block translate-y-[110%] ${cls ?? ""}`}>
+                        {w}
+                      </span>
+                    </span>{" "}
+                  </span>
+                )
+              )}
             </h1>
             <p
               ref={subRef}
-              className="text-[15px] text-muted max-w-[440px] leading-[1.6] mb-8"
+              className="text-[15px] text-muted max-w-[460px] leading-[1.75] mb-8"
               style={{ opacity: 0 }}
             >
-              Express, TypeScript, PostgreSQL, React — and AI systems that actually ground their claims.
-              Two tracks of work below.
+              A full-stack engineer building production software and AI for real operators — grounded
+              answers, honest about the gaps, and no demo-ware.
             </p>
-            <div className="flex gap-4 flex-wrap">
+            <div className="flex gap-4 flex-wrap items-center">
               <Link
-                href="/ai-ml"
-                className="font-mono text-[11px] px-4 py-2.5 rounded-sm text-accent-ai transition-all duration-200 hover:bg-accent-ai/10"
-                style={{ border: "0.5px solid #6B8EAE55" }}
+                href="#work"
+                className="font-mono text-[12px] tracking-[0.02em] font-medium px-5 py-3 rounded-sm bg-[#3dd0c0] text-[#04201d] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(61,208,192,0.4)]"
               >
-                AI implementations →
+                view work →
               </Link>
               <Link
-                href="/business"
-                className="font-mono text-[11px] px-4 py-2.5 rounded-sm text-accent-biz transition-all duration-200 hover:bg-accent-biz/10"
-                style={{ border: "0.5px solid #B8996855" }}
+                href="/about"
+                className="font-mono text-[12px] tracking-[0.02em] px-5 py-3 rounded-sm text-muted transition-all duration-200 hover:-translate-y-0.5 hover:text-default hover:underline underline-offset-4"
+                style={{ border: "0.5px solid var(--border-subtle)" }}
               >
-                Business systems →
+                about me
               </Link>
             </div>
           </div>
 
-          {/* Scroll hint */}
-          <div className="flex justify-center pb-8">
-            <div className="flex flex-col items-center gap-1.5 opacity-30">
+          {/* Hero footer — quick links + scroll hint */}
+          <div className="flex justify-between items-end pb-8">
+            <div className="flex gap-4">
+              <a href="https://github.com/Kazzz-ab" target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-faint hover:text-default transition-colors duration-150">github ↗</a>
+              <a href="https://www.linkedin.com/in/kazi-abrarul-haque05/" target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-faint hover:text-default transition-colors duration-150">linkedin ↗</a>
+              <a href="mailto:kaziabrarulh@gmail.com" className="font-mono text-[11px] text-faint hover:text-default transition-colors duration-150">email ↗</a>
+            </div>
+            <div className="hidden sm:flex flex-col items-center gap-1.5 opacity-30">
               <span className="font-mono text-[9px] tracking-[0.12em] text-faint">scroll</span>
-              <div
-                className="w-px bg-faint"
-                style={{ height: "28px", animation: "fadeDown 2s ease infinite" }}
-              />
+              <div className="w-px bg-faint" style={{ height: "28px", animation: "fadeDown 2s ease infinite" }} />
             </div>
           </div>
         </div>
@@ -268,7 +273,8 @@ export default function Home() {
 
       {/* Track sections */}
       <div
-        className="max-w-[720px] mx-auto px-5 md:px-7 py-10 md:py-14"
+        id="work"
+        className="max-w-[720px] mx-auto px-5 md:px-7 py-10 md:py-14 scroll-mt-16"
         style={{ borderTop: "0.5px solid var(--border-subtle)" }}
       >
         <p className="font-mono text-[10px] tracking-[0.12em] text-faint mb-6">select a track</p>
@@ -276,8 +282,8 @@ export default function Home() {
           <TrackCard
             number="01" accentLabel="about" accentClass="text-accent-about" glowColor="#8FA88F"
             title="Kazi Abrarul Haque — Dhaka"
-            description="Final-year CSE student building production systems. Available for AI integration and architecture-led builds, remote-first."
-            ctaCount="available 2026" ctaText="read more" href="/about"
+            description="Builds production software and AI systems people can rely on. Available for remote work now — AI integration and architecture-led builds."
+            ctaCount="available now" ctaText="read more" href="/about"
             motif={<AboutMotif />}
           />
           <TrackCard
@@ -288,8 +294,8 @@ export default function Home() {
             motif={<AiMotif />}
           />
           <TrackCard
-            number="03" accentLabel="business" accentClass="text-accent-biz" glowColor="#B89968"
-            title="Full-stack business systems"
+            number="03" accentLabel="web & saas" accentClass="text-accent-biz" glowColor="#B89968"
+            title="Full-stack web & SaaS"
             description="Booking platforms, multi-tenant apps, headless commerce, marketing systems. Architecture-first builds for operators, not for show."
             ctaCount="4 projects" ctaText="view work" href="/business"
             motif={<BizMotif />}

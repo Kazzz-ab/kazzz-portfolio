@@ -42,7 +42,7 @@ export default function BusinessPage() {
       <div className="relative pb-7 mb-6">
         <Reveal className="flex items-baseline gap-3 mb-3.5">
           <span className="font-mono text-[11px] tracking-[0.04em] text-faint">02</span>
-          <span className="font-mono text-[11px] tracking-[0.1em] text-accent-biz">business systems</span>
+          <span className="font-mono text-[11px] tracking-[0.1em] text-accent-biz">web &amp; saas</span>
         </Reveal>
         <Reveal as="h1" delay={60} className="text-[30px] font-medium tracking-[-0.02em] text-primary leading-[1.15] max-w-[480px] mb-3">
           Production systems for real operators

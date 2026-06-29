@@ -8,8 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const navItems = [
   { href: "/about", label: "about", hoverAccent: "hover:text-accent-about" },
   { href: "/ai-ml", label: "ai/ml", hoverAccent: "hover:text-accent-ai" },
-  { href: "/business", label: "business", hoverAccent: "hover:text-accent-biz" },
-  { href: "mailto:kaziabrarulh@gmail.com", label: "contact", hoverAccent: "hover:text-accent-ai" },
+  { href: "/business", label: "web & saas", hoverAccent: "hover:text-accent-biz" },
 ];
 
 function accentForPath(path: string): string {
@@ -36,7 +35,7 @@ export function Nav() {
           href="/"
           className="font-mono text-[12px] tracking-[0.04em] text-default hover:text-primary transition-colors duration-150"
         >
-          kazi a. haque
+          Kazi A. Haque
         </Link>
 
         {/* Desktop: nav links + theme toggle grouped together on the right */}
@@ -62,6 +61,17 @@ export function Nav() {
               </Link>
             );
           })}
+          <span className="hidden lg:inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.06em] text-shipped">
+            <span className="w-1.5 h-1.5 rounded-full bg-shipped" style={{ animation: "pulse-dot 2s ease infinite" }} />
+            available now
+          </span>
+          <a
+            href="mailto:kaziabrarulh@gmail.com?subject=Project%20enquiry"
+            className="font-mono text-[11px] tracking-[0.04em] text-accent-ai px-3 py-2 rounded-sm transition-all duration-200 hover:bg-accent-ai/10"
+            style={{ border: "0.5px solid #6B8EAE55" }}
+          >
+            start a project →
+          </a>
           {/* Divider */}
           <span className="w-px h-3 bg-ghost" />
           <ThemeToggle />
@@ -95,7 +105,7 @@ export function Nav() {
           <div className="flex justify-between items-center px-7 pt-7 pb-8">
             <Link href="/" onClick={() => setOpen(false)}
               className="font-mono text-[12px] tracking-[0.04em] text-default">
-              kazi a. haque
+              Kazi A. Haque
             </Link>
             <div className="flex items-center gap-4">
               <ThemeToggle />
@@ -126,11 +136,18 @@ export function Nav() {
             ))}
           </nav>
           <div className="mt-auto px-7 pb-8">
+            <a
+              href="mailto:kaziabrarulh@gmail.com?subject=Project%20enquiry"
+              onClick={() => setOpen(false)}
+              className="font-mono text-[13px] text-accent-ai inline-flex items-center gap-2 mb-4"
+            >
+              start a project →
+            </a>
             <p
               className="font-mono text-[10px] tracking-[0.08em] text-faint"
               style={{ animation: "drawerIn 0.45s ease both", animationDelay: "360ms" }}
             >
-              full-stack engineer · dhaka, bd
+              full-stack + AI engineer · available now
             </p>
           </div>
         </div>
